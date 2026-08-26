@@ -361,7 +361,7 @@ transition:opacity .5s,transform .5s cubic-bezier(.2,1.4,.4,1)}
 .gtop{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:8px}
 .hcta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .hint{font-size:clamp(11px,.95vw,13px);color:var(--cz2)}
-.orbe{position:relative;width:100%;height:clamp(280px,43vh,460px)}
+.orbe{position:relative;width:100%;height:clamp(290px,44vh,490px)}
 svg.teia{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 svg.teia path{stroke:rgba(212,178,105,.55);stroke-width:1;fill:none;
 stroke-dasharray:var(--len);stroke-dashoffset:var(--len);transition:stroke-dashoffset .9s ease .1s}
@@ -384,12 +384,12 @@ text-align:var(--al,center);min-width:0}
 .gnode.on.cur b{color:var(--am);text-shadow:0 0 26px rgba(201,162,84,.45)}
 .gnode.dim{opacity:.28}
 .gnode b{display:block;font-family:var(--tit);font-weight:700;letter-spacing:-.015em;
-font-size:clamp(14px,1.5vw,21px);transition:color .2s;line-height:1.2;white-space:nowrap}
-.gnode i{font-style:normal;font-size:clamp(10px,.9vw,12px);color:var(--cz2);letter-spacing:.06em}
+font-size:clamp(12px,1.15vw,16.5px);transition:color .2s;line-height:1.2;white-space:nowrap}
+.gnode i{font-style:normal;font-size:clamp(9px,.8vw,10.5px);color:var(--cz2);letter-spacing:.06em}
 .gnode:hover b,.gnode.sel b{color:var(--am)}
 .gnode.xpn b{color:var(--cz)}
 .gnode.xpn:hover b,.gnode.xpn.sel b{color:var(--am)}
-.gdet{margin-top:4px;border-top:1px solid var(--ln);padding-top:12px;min-height:60px;
+.gdet{margin-top:4px;border-top:1px solid var(--ln);padding-top:10px;min-height:54px;
 display:flex;gap:clamp(14px,3vw,40px);align-items:baseline;flex-wrap:wrap}
 .gdet.swap>*{animation:gdetIn .55s cubic-bezier(.2,.8,.3,1) both}
 @keyframes gdetIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
@@ -721,7 +721,7 @@ font-family:var(--tit);font-size:13px;transition:.2s}
       <div>
         <div class="eyebrow" data-r style="--i:0">Quem está atrás de mim</div>
         <h2 data-r style="--i:1">Um grupo de <span>18 empresas</span></h2>
-        <p class="sub" data-r style="--i:2" style="margin-bottom:0">A XP é a nossa fornecedora de plataforma de investimentos. Uma peça importante, mas uma peça. O grupo resolve a vida financeira inteira.</p>
+        <p class="sub" data-r style="--i:2" style="margin-bottom:0">A XP é a fornecedora da plataforma de investimentos. O grupo cobre a vida financeira inteira em dezesseis frentes, da carteira à energia da sua empresa.</p>
       </div>
       <div class="hcta" data-r style="--i:3">
         <button class="btn sm" id="lib">Abrir o grupo</button>
@@ -731,7 +731,7 @@ font-family:var(--tit);font-size:13px;transition:.2s}
     </div>
     <div class="orbe" id="orbe">
       <svg class="teia" id="teia" preserveAspectRatio="none"></svg>
-      <div class="ghub"><b>VOCÊ</b><em id="cnt">0</em><i>EMPRESAS</i></div>
+      <div class="ghub"><b>VOCÊ</b><em id="cnt">0</em><i>SOLUÇÕES</i></div>
     </div>
     <div class="gdet" id="gdet">
       <h4>be.smart holding</h4>
@@ -862,7 +862,7 @@ const NOTAS=[
 ['Processo','AQUI entra o script do medico: "eu sou o clinico geral do seu patrimonio; identifico a dor e levo ao especialista: ortopedista, cirurgiao... voce nunca precisa saber a qual porta bater".'],
 ['Planejamento','Mostrar o documento. "Isso aqui e seu, escrito, confidencial. Nada acontece fora dele."'],
 ['Ciclo 12.4.1','Roda viva: passar o mouse nos gomos. "12 contatos, 4 de performance, 1 revisao geral. Voce nunca fica 30 dias sem noticia minha."'],
-['Grupo','Clicar em Tour e deixar rodar enquanto narra: "sou socio de um grupo de 18 empresas; a XP e fornecedora, nao dona".'],
+['Grupo','Tour: 16 solucoes em ~40s. Narrar: "sou socio de um grupo de 18 empresas; a XP e a fornecedora de investimentos, o grupo cobre o resto: do seguro a energia da sua empresa".'],
 ['Remuneracao','Perguntar: "quanto voce acha que paga hoje?" Dai simular com o numero dele. Nunca prometer economia: e exemplo.'],
 ['Diagnostico','Video rodando. Virar o notebook levemente e comecar as perguntas do diagnostico. A apresentacao acabou, a conversa comecou.'],
 ['Fecho','QR/agenda. "Primeira reuniao e so conversa e questionario."']];
@@ -946,19 +946,26 @@ addEventListener('resize',()=>{ if(cur===6) desenhaMed(); });
 
 /* GRUPO be.smart — constelação */
 const F=[
- {n:'Investimentos',d:'Plataforma de investimentos: renda fixa, fundos, ações, previdência e estruturados. É o serviço que a XP fornece ao grupo.',p:['XP Investimentos'],xp:1},
- {n:'Seguros',d:'Patrimonial, empresarial e responsabilidade civil, com cotação comparada.',p:['Porto','Alfa','HDI','Swiss Re','Tokio Marine','Liberty']},
- {n:'Vida',d:'Vida individual, resgatável e vida como instrumento de sucessão.',p:['Bradesco','MetLife','Omint','MAG','Icatu','Azos']},
- {n:'Saúde',d:'Planos individual, familiar e empresarial, com comparativo de rede.',p:['Bradesco Saúde','Golden Cross','Unimed','Amil','SulAmérica']},
- {n:'Consórcio',d:'Imóvel, auto e pesados. Carta contemplada, lance estruturado e mercado secundário.',p:['Porto','Ademicon','Itaú','BB','Mapfre','Rodobens']},
- {n:'Crédito',d:'Crédito com garantia de imóvel, consignado e antecipação.',p:['Santander','Bradesco','BB','Itaú','Caixa']},
- {n:'Câmbio e offshore',d:'Remessa internacional, conta e investimento fora do país.',p:['XP Miami','BS2','Ourinvest']},
- {n:'Imóveis',d:'Compra, venda e estruturação patrimonial de imóveis.',p:['Rede de parceiros']},
- {n:'Jurídico',d:'Holding familiar, planejamento sucessório e revisão societária.',p:['JQT Advocacia']}
+ {n:'Investimentos',d:'O core: alocação, fundos, previdência e fee fixo pela plataforma da maior corretora da América Latina.',p:['XP Investimentos','XP Asset'],xp:1},
+ {n:'Internacional',d:'Conta, investimento e previdência fora do país, em dólar.',p:['XP Internacional','Avenue','Investors Trust','Dolarize.me']},
+ {n:'Seguro de vida',d:'Corretora própria cotando em 25 seguradoras, incluindo vida como instrumento de sucessão.',p:['Prudential','MAG','MetLife','Icatu','Omint','Porto','+19']},
+ {n:'Seguros patrimoniais',d:'Auto, residência, empresarial, responsabilidade civil, fiança e garantia.',p:['25 seguradoras cotadas']},
+ {n:'Saúde',d:'Planos PF e empresa, nacionais e internacionais com cobertura global.',p:['Omint','SulAmérica','Bradesco Saúde','+']},
+ {n:'Crédito PF',d:'Financiamento imobiliário e crédito com garantia de imóvel ou veículo, cotado em ~10 bancos.',p:['Santander','Bradesco','Itaú','Caixa','+']},
+ {n:'Crédito PJ',d:'Capital de giro, desconto de duplicata e conta garantida para empresas.',p:['Paramis Capital']},
+ {n:'Mercado de capitais',d:'Emissões estruturadas: debênture, CRA, CRI, nota comercial e reperfilamento de dívida.',p:['Paramis Capital']},
+ {n:'M&A e valuation',d:'Avaliação de empresas, diligência e assessoria em compra e venda.',p:['Paramis Capital']},
+ {n:'Tributário',d:'Recuperação de créditos tributários sobre a folha dos últimos 5 anos.',p:['Parceiros especializados']},
+ {n:'Consórcio',d:'Nove administradoras, lance estruturado e mercado secundário de carta contemplada.',p:['Porto','Itaú','Embracon','Ademicon','Mapfre','+4']},
+ {n:'Câmbio',d:'Mesa própria que leiloa sua cotação entre 5 players. Remessas, FINIMP, ACC e ACE.',p:['Mesa própria be.smart']},
+ {n:'Jurídico',d:'Advocacia do grupo, modelo one stop shop.',p:['JQT Advocacia']},
+ {n:'Sucessório',d:'Holding familiar, testamento e estrutura internacional quando faz sentido.',p:['JQT Advocacia','Parceiros offshore']},
+ {n:'Imóveis',d:'Imobiliária própria do grupo: compra, venda e administração com lógica de family office.',p:['be.smart Imóveis']},
+ {n:'Energia',d:'Migração para o mercado livre de energia e solar para quem tem indústria ou consumo alto.',p:['Fornecedores parceiros']}
 ];
 const orbe=document.getElementById('orbe'), teia=document.getElementById('teia'), gdet=document.getElementById('gdet'),
       cnt=document.getElementById('cnt');
-const TOTAL=18, NSg='http://www.w3.org/2000/svg';
+const TOTAL=16, NSg='http://www.w3.org/2000/svg';
 const gnodes=F.map((f,i)=>{
   const d=document.createElement('div');
   d.className='gnode'+(f.xp?' xpn':'');
@@ -976,13 +983,14 @@ function posiciona(){
   const cx=W/2, cy=H/2, rx=Math.min(W*.40,W/2-130), ry=H*.40;
   gnodes.forEach((d,i)=>{
     const a=-Math.PI/2+i*(2*Math.PI/F.length);
-    const x=cx+Math.cos(a)*rx, y=cy+Math.sin(a)*ry;
+    const f=(i%2===0)?1:0.72;
+    const x=cx+Math.cos(a)*rx*f, y=cy+Math.sin(a)*ry*f;
     d.style.setProperty('--x',x+'px'); d.style.setProperty('--y',y+'px');
     d.style.setProperty('--al',Math.cos(a)>.35?'left':Math.cos(a)<-.35?'right':'center');
     d.style.transitionDelay=(i*60)+'ms';
     const hub=document.querySelector('.ghub');const hr=(hub?hub.offsetWidth/2:90)+10;
     const sx=cx+Math.cos(a)*hr, sy=cy+Math.sin(a)*hr;
-    const ex=cx+Math.cos(a)*(rx*.9), ey=cy+Math.sin(a)*(ry*.86);
+    const ex=cx+Math.cos(a)*(rx*f*.9), ey=cy+Math.sin(a)*(ry*f*.84);
     const mx=(sx+ex)/2 - Math.sin(a)*28, my=(sy+ey)/2 + Math.cos(a)*28;
     const p=document.createElementNS(NSg,'path');
     p.setAttribute('d',`M${sx} ${sy} Q${mx} ${my} ${ex} ${ey}`);
@@ -1027,15 +1035,15 @@ function tourPasso(){
     if(k===tourK)n.classList.add('on');
   });
   if(paths[tourK])paths[tourK].classList.add('on');
-  contaAte((tourK+1)*2);
+  contaAte(tourK+1);
   detSwap('<span class="gstep"><b>'+(tourK+1)+'</b> / '+F.length+'</span>'+
     '<h4>'+f.n+(f.xp?'<small>fornecedor</small>':'')+'</h4>'+
     '<div><p>'+f.d+'</p><div class="par" style="margin-top:8px">'+f.p.join('<s>\u00b7</s>')+'</div></div>');
   tourK++;
-  if(tourK<F.length){tourT=setTimeout(tourPasso,3400);}
+  if(tourK<F.length){tourT=setTimeout(tourPasso,2600);}
   else{tourT=setTimeout(()=>{
     gnodes.forEach(n=>n.classList.remove('cur','dim'));
-    detSwap('<h4>be.smart holding</h4><div><p>Nove frentes, dezoito empresas, um único ponto de contato: você fala comigo, e o grupo inteiro trabalha atrás.</p></div>');
+    detSwap('<h4>be.smart holding</h4><div><p>Dezesseis soluções, dezoito empresas, um único ponto de contato: você fala comigo, e o grupo inteiro trabalha atrás.</p></div>');
     paraTour();
   },3400);}
 }
