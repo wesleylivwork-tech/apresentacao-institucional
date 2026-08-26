@@ -194,11 +194,16 @@ text-transform:uppercase;color:var(--cz2);margin-bottom:4px}
 .srout .ok{border-color:rgba(228,201,139,.35)}
 .srout .ok b{color:var(--am2)}
 .srout .dif b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.srout .grande b{font-size:clamp(1.5rem,2.4vw,2.1rem)}
+.srnotas{display:flex;flex-direction:column;gap:3px;margin-top:8px;border-top:1px solid var(--ln2);padding-top:7px}
+.srnotas span{font-size:clamp(11px,.95vw,13px);color:var(--cz);line-height:1.5;padding-left:16px;position:relative}
+.srnotas span::before{content:'';position:absolute;left:0;top:.55em;width:7px;height:2px;background:var(--am)}
 
 /* RODA VIVA */
 #roda12 path{cursor:pointer}
+.live #roda12 path{transition:none}
 #roda12 path:hover{filter:brightness(1.35)}
-.rodainfo{margin-top:10px;min-height:44px;border-left:2px solid var(--am);padding:6px 0 6px 14px}
+.rodainfo{margin-top:10px;height:92px;overflow:hidden;width:0;min-width:100%;border-left:2px solid var(--am);padding:6px 0 6px 14px}
 .rodainfo b{font-family:var(--tit);font-size:clamp(12.5px,1.05vw,15px);color:var(--am2)}
 .rodainfo p{font-size:clamp(11.5px,.95vw,13.5px);color:var(--cz);line-height:1.5;font-weight:300}
 
@@ -214,6 +219,11 @@ display:flex;align-items:flex-end;padding:clamp(24px,4vw,52px);width:100%;backgr
 .vidwrap h2{margin-bottom:10px}
 .vidwrap p{color:#E6E4DA;font-size:clamp(1rem,1.4vw,1.2rem);line-height:1.6;font-weight:300}
 
+@media(max-height:920px){
+  #s9 .srnotas span{font-size:11px}
+  #s9 .srout>div{padding:7px 12px}
+  #s9 .simrem{padding:8px 14px}
+}
 @media(max-height:830px){
   #s9 h2{font-size:clamp(1.5rem,3vw,2rem);margin-bottom:6px}
   #s9 .sub{margin-bottom:8px!important;font-size:.9rem}
@@ -639,26 +649,26 @@ font-family:var(--tit);font-size:13px;transition:.2s}
     <p class="sub" data-r style="--i:2">O documento que sustenta tudo. Escrito, entregue e revisado com você.</p>
     <div class="plan">
       <div class="pcol esq">
-        <div class="pitem" data-r style="--i:3"><b>Contexto de vida</b><i>quem você é e o que importa</i></div>
-        <div class="pitem" data-r style="--i:4"><b>Perfil de risco e metas</b><i>até onde faz sentido ir</i></div>
-        <div class="pitem" data-r style="--i:5"><b>Cenário macro</b><i>a leitura do momento</i></div>
-        <div class="pitem" data-r style="--i:6"><b>Alocação</b><i>a carteira sugerida</i></div>
-        <div class="pitem" data-r style="--i:7"><b>Eficiência fiscal</b><i>pagar só o imposto devido</i></div>
+        <div class="pitem" data-r style="--i:3"><b>Perfil do cliente e família</b><i>quem você é e quem importa</i></div>
+        <div class="pitem" data-r style="--i:4"><b>Objetivos e prioridades</b><i>curto, médio e longo prazo</i></div>
+        <div class="pitem" data-r style="--i:5"><b>Panorama patrimonial</b><i>a fotografia completa do que você tem</i></div>
+        <div class="pitem" data-r style="--i:6"><b>Diagnóstico de investimentos</b><i>onde está e o que precisa mudar</i></div>
+        <div class="pitem" data-r style="--i:7"><b>Perfil de risco e metas</b><i>retorno real acima da inflação</i></div>
       </div>
       <div class="pdoc" data-z style="--i:4">
         <div class="cab">Planejamento patrimonial</div>
         <div class="tit">
           <b>Preparado<br><span>exclusivamente</span><br>para você</b>
-          <i>Documento estratégico e confidencial, base de todas as decisões da carteira.</i>
+          <i>17 capítulos, do sumário executivo aos próximos passos. Estratégico e confidencial.</i>
         </div>
         <div class="pe"><span>Wesley</span><span>Confidencial</span></div>
       </div>
       <div class="pcol dir">
-        <div class="pitem" data-r style="--i:5"><b>Gestão de risco</b><i>proteção antes de retorno</i></div>
-        <div class="pitem" data-r style="--i:6"><b>Independência financeira</b><i>o número e o caminho</i></div>
-        <div class="pitem" data-r style="--i:7"><b>Sucessão e herança</b><i>o patrimônio atravessa gerações</i></div>
-        <div class="pitem" data-r style="--i:8"><b>Metas e objetivos</b><i>curto, médio e longo prazo</i></div>
-        <div class="pitem" data-r style="--i:9"><b>Plano de ação</b><i>o que fazer, quando e por quê</i></div>
+        <div class="pitem" data-r style="--i:5"><b>Carteira sugerida</b><i>a alocação desenhada pra você</i></div>
+        <div class="pitem" data-r style="--i:6"><b>Proteção e gestão de risco</b><i>seguros e blindagem antes do retorno</i></div>
+        <div class="pitem" data-r style="--i:7"><b>Tributário e societário</b><i>pagar só o imposto devido</i></div>
+        <div class="pitem" data-r style="--i:8"><b>Sucessão e herança</b><i>o patrimônio atravessa gerações</i></div>
+        <div class="pitem" data-r style="--i:9"><b>Jornada e acompanhamento</b><i>próximos passos e revisões</i></div>
       </div>
     </div>
   </div>
@@ -748,23 +758,26 @@ font-family:var(--tit);font-size:13px;transition:.2s}
       </table>
     </div>
     <div class="simrem" data-r style="--i:4">
-      <div class="srtit">Simule com o seu número</div>
+      <div class="srtit">Simule o custo do fee fixo</div>
       <div class="srrow">
         <span class="srlab">Patrimônio investido</span>
         <input type="range" id="sr-pat" min="300000" max="30000000" step="100000" value="2000000">
         <b id="sr-pat-out">R$ 2.000.000</b>
       </div>
       <div class="srrow dupla">
-        <label>Custo estimado comissionado <input type="number" id="sr-com" value="1.8" step="0.1" min="0" max="5">% a.a.</label>
-        <label>Fee fixo <input type="number" id="sr-fee" value="0.9" step="0.1" min="0" max="5">% a.a.</label>
+        <label>Taxa <input type="number" id="sr-fee" value="0.40" step="0.05" min="0" max="3">% ao ano sobre o patrimônio</label>
       </div>
       <div class="srout">
-        <div><i>Comissionado</i><b id="sr-o-com">-</b><u>por ano</u></div>
-        <div class="ok"><i>Fee fixo</i><b id="sr-o-fee">-</b><u>por ano</u></div>
-        <div class="dif"><i>Diferença em 10 anos</i><b id="sr-o-dif">-</b><u>sem considerar rendimento</u></div>
+        <div class="ok grande"><i>Custo mensal</i><b id="sr-o-mes">-</b><u>debitado em conta, sem surpresa</u></div>
+        <div><i>Total no ano</i><b id="sr-o-ano">-</b><u>o mensal vezes doze</u></div>
+      </div>
+      <div class="srnotas">
+        <span>Cancela quando quiser, sem multa: avisa com 30 dias e volta ao modelo comissionado</span>
+        <span>Você recebe de volta parte das taxas dos produtos (rebate) creditada na sua conta</span>
+        <span>Renda variável tem corretagem à parte, fora do fee</span>
       </div>
     </div>
-    <div class="fonte" data-r style="--i:5" style="margin-top:10px">Exemplo ilustrativo com percentuais definidos na conversa. Não é oferta nem promessa. A definição do modelo passa por perfil, volume e suitability.</div>
+    <div class="fonte" data-r style="--i:5" style="margin-top:10px">Exemplo ilustrativo com taxa definida em contrato. Condições completas no Termo de Fee Fixo da XP. A definição do modelo passa por perfil, volume e suitability.</div>
   </div>
 </section>
 
@@ -1049,18 +1062,17 @@ function abrirG(i){
     '<div><p>'+f.d+'</p><div class="par" style="margin-top:8px">'+f.p.join('<s>·</s>')+'</div></div>';
 }
 
-/* SIMULADOR REMUNERACAO */
+/* SIMULADOR FEE FIXO */
 (function(){
-  const pat=document.getElementById('sr-pat'),com=document.getElementById('sr-com'),fee=document.getElementById('sr-fee');
+  const pat=document.getElementById('sr-pat'),fee=document.getElementById('sr-fee');
   const fR=v=>'R$ '+Math.round(v).toLocaleString('pt-BR');
   function calc(){
-    const P=parseInt(pat.value), c=Math.max(0,parseFloat(com.value)||0)/100, f=Math.max(0,parseFloat(fee.value)||0)/100;
+    const P=parseInt(pat.value), f=Math.min(3,Math.max(0,parseFloat(fee.value)||0))/100;
     document.getElementById('sr-pat-out').textContent=fR(P);
-    document.getElementById('sr-o-com').textContent=fR(P*c);
-    document.getElementById('sr-o-fee').textContent=fR(P*f);
-    document.getElementById('sr-o-dif').textContent=fR(Math.abs(P*c-P*f)*10);
+    document.getElementById('sr-o-mes').textContent=fR(P*f/12);
+    document.getElementById('sr-o-ano').textContent=fR(P*f);
   }
-  [pat,com,fee].forEach(el=>el.addEventListener('input',calc)); calc();
+  [pat,fee].forEach(el=>el.addEventListener('input',calc)); calc();
 })();
 
 /* VIDEO DO DIAGNOSTICO */
