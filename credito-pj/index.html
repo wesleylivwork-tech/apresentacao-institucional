@@ -3,196 +3,135 @@
 <head>
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
-<title>Seleção de Crédito PJ</title>
+<title>Simulador de Crédito PJ</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
-/* Layout: painel largo de notebook (Notion escuro) com abas grandes no topo; uma tarefa por aba. Modo cliente troca para off-white e navy. */
+/* Layout: simulador em uma coluna, no fluxo do simulador da XP (valor, ativos, resultado), com cartões brancos sobre fundo claro. Paleta off-white e navy do material de cliente. */
 :root{
-  --bg:#191919; --panel:#202020; --panel2:#262626; --fg:#f0efed; --mut:#9b9a97; --faint:#73726e;
-  --line:rgba(255,255,255,.094); --hover:rgba(255,255,255,.055); --strong:rgba(255,255,255,.22);
-  --hg:rgba(81,166,255,.49); --hg-t:rgba(81,166,255,.08); --hg-i:#e5f2fc;
-  --hy:rgba(255,143,71,.48); --hy-t:rgba(255,143,71,.08); --hy-i:#fbebde;
-  --in:rgba(255,188,53,.46); --in-t:rgba(255,188,53,.07); --in-i:#f9f3dc;
-  --ok:rgba(113,255,175,.34); --ok-t:rgba(113,255,175,.07); --ok-i:#e8f1ec;
-  --et:rgba(168,101,255,.46); --et-t:rgba(168,101,255,.08); --et-i:#eae4f2;
-  --gr:rgba(255,255,243,.082); --gr-i:#f0efed;
-  --good:#7fd1a3; --warn:#e8a46a; --accent:#3d8fe6;
-  --s1:#3d8fe6; --s2:#c7852f; --s3:#9a62d8; --s4:#2f9e6a; --cdi:#8a8986;
-  --hm-good:113,255,175; --hm-bad:255,143,71; --hm-mid:rgba(255,255,255,.05);
-  --tip:#2a2a2a; --shadow:0 6px 24px rgba(0,0,0,.45);
-  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; --title:var(--font);
-  color-scheme:dark;
-}
-:root[data-modo="cliente"]{
-  --bg:#FBFBFA; --panel:#F3F3F1; --panel2:#ECECEA; --fg:#16181C; --mut:#71757C; --faint:#8C9BAE;
-  --line:#E6E7E9; --hover:rgba(28,53,87,.05); --strong:#C9CED6;
-  --hg:#1C3557; --hg-t:rgba(28,53,87,.06); --hg-i:#FBFBFA;
-  --hy:#8C5040; --hy-t:rgba(140,80,64,.07); --hy-i:#FBFBFA;
-  --in:#8C9BAE; --in-t:rgba(140,155,174,.12); --in-i:#16181C;
-  --ok:#4A6B57; --ok-t:rgba(74,107,87,.08); --ok-i:#FBFBFA;
-  --et:#5B6B86; --et-t:rgba(91,107,134,.08); --et-i:#FBFBFA;
-  --gr:#E6E7E9; --gr-i:#16181C;
-  --good:#4A6B57; --warn:#8C5040; --accent:#1C3557;
+  --bg:#F3F3F1; --card:#FFFFFF; --fg:#16181C; --mut:#71757C; --faint:#9AA3B2; --line:#E6E7E9; --strong:#C9CED6; --soft:#F6F6F4;
+  --accent:#1C3557; --accent-ink:#FFFFFF; --hi:#8C9BAE; --good:#4A6B57; --warn:#8C5040;
   --s1:#2e5a92; --s2:#b8792c; --s3:#7a4fb0; --s4:#2f8a5f; --cdi:#8C9BAE;
-  --hm-good:74,107,87; --hm-bad:140,80,64; --hm-mid:rgba(28,53,87,.04);
-  --tip:#FFFFFF; --shadow:0 6px 24px rgba(22,24,28,.12);
-  --font:Calibri,Carlito,"Segoe UI",Helvetica,Arial,sans-serif; --title:Cambria,Georgia,"Times New Roman",serif;
+  --hg:#1C3557; --hy:#8C5040; --et:#5B6B86; --in:#8C9BAE; --lg:#D9DCE1;
+  --title:Cambria,Georgia,"Times New Roman",serif; --font:Calibri,Carlito,"Segoe UI",Helvetica,Arial,sans-serif;
   color-scheme:light;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-img{max-width:100%}
 html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--font);font-size:15px;line-height:1.5;margin:0}
+body{font-family:var(--font);font-size:15.5px;line-height:1.5;margin:0}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
-.wrap{max-width:1560px;margin:0 auto;padding-block:22px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:22px 72px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header.top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
-h1{font-family:var(--title);font-size:38px;line-height:1.15;font-weight:700;margin:0;text-wrap:balance}
-h2{font-family:var(--title);font-size:24px;font-weight:700;margin:0 0 6px;text-wrap:balance}
-h3{font-family:var(--title);font-size:17px;margin:0 0 6px}
-.sub{color:var(--mut);margin:6px 0 0;max-width:78ch}
-.lead{color:var(--mut);margin:0 0 16px;max-width:86ch}
-.btn{background:var(--panel2);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:8px 14px;font:inherit;font-size:14.5px;cursor:pointer;line-height:1.2}
-.btn:hover{border-color:var(--strong)}
-.btn.pri{background:var(--accent);border-color:transparent;color:#fff}
-.btn.sm{padding:5px 10px;font-size:13.5px}
-.btn.on{background:var(--hover);border-color:var(--strong)}
-.btn:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,.lnk:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-input[type=text],input[type=search],input[type=number],select{background:var(--panel);border:1px solid var(--line);color:var(--fg);border-radius:6px;padding:8px 10px;font:inherit;font-size:14.5px}
-.modo{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:13.5px}
-nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:14px 0 12px;margin:14px 0 22px;border-bottom:1px solid var(--line);scrollbar-width:thin}
-.tab{flex:0 0 auto;background:transparent;border:1px solid transparent;color:var(--mut);border-radius:8px;padding:9px 14px;font:inherit;font-size:15px;cursor:pointer;white-space:nowrap}
-.tab:hover{background:var(--hover);color:var(--fg)}
-.tab[aria-selected="true"]{background:var(--panel2);border-color:var(--line);color:var(--fg);font-weight:600}
-.tab .n{display:inline-block;min-width:20px;padding:0 6px;margin-left:6px;border-radius:10px;background:var(--hover);font-size:12px;color:var(--mut)}
-section[data-panel]{display:flex;flex-direction:column;gap:18px;min-width:0}
-.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.step{background:var(--panel);border-radius:8px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
-.step b.num{flex:0 0 28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
-.step p{margin:0;color:var(--mut);font-size:14px}.step strong{color:var(--fg);display:block}
-.kpis{display:flex;flex-wrap:wrap;gap:28px}
-.kpi .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}
-.kpi .k{font-size:12.5px;color:var(--mut)}
-.pill{display:inline-block;border-radius:4px;padding:0 7px;font-size:12px;line-height:21px;white-space:nowrap}
-.p-hg{background:var(--hg);color:var(--hg-i)}.p-hy{background:var(--hy);color:var(--hy-i)}.p-in{background:var(--in);color:var(--in-i)}.p-et{background:var(--et);color:var(--et-i)}.p-ok{background:var(--ok);color:var(--ok-i)}.p-gr{background:var(--gr);color:var(--gr-i)}
-.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.col{display:flex;flex-direction:column;gap:8px;min-width:0}
-.col-h{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);padding:2px 2px 4px}
-.card{border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:5px;min-width:0}
-.col.hg .card{background:var(--hg-t)}.col.hy .card{background:var(--hy-t)}.col.in .card{background:var(--in-t)}.col.et .card{background:var(--et-t)}
-.card .row{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums}
-.card .row b{color:var(--fg);font-weight:600}
-.card .acts{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
-.lnk{all:unset;cursor:pointer;font-weight:600;line-height:1.35;border-bottom:1px dotted var(--faint)}
+h1{font-family:var(--title);font-size:34px;line-height:1.15;margin:0;font-weight:700;color:var(--accent);text-wrap:balance}
+h2{font-family:var(--title);font-size:21px;margin:0;font-weight:700;text-wrap:balance}
+h3{font-family:var(--title);font-size:17px;margin:0}
+.sub{color:var(--mut);margin:6px 0 0;max-width:72ch}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;margin:12px 0 18px;border-bottom:1px solid var(--line)}
+.tab{flex:0 0 auto;background:transparent;border:1px solid transparent;color:var(--mut);border-radius:8px;padding:9px 16px;font:inherit;font-size:15.5px;cursor:pointer;white-space:nowrap}
+.tab:hover{color:var(--fg);background:var(--card)}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+section[data-panel]{display:flex;flex-direction:column;gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.num{display:inline-flex;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:14px;align-items:center;justify-content:center;margin-right:8px;font-family:var(--font);font-weight:700;vertical-align:2px}
+.btn{background:var(--card);border:1px solid var(--strong);color:var(--fg);border-radius:7px;padding:8px 14px;font:inherit;font-size:15px;cursor:pointer;line-height:1.2}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:700}
+.btn.sm{padding:6px 11px;font-size:14px}
+.btn.on{background:var(--soft);border-color:var(--accent);font-weight:700}
+.btn:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,.lnk:focus-visible{outline:2px solid var(--s1);outline-offset:2px}
+input[type=text],input[type=search],input[type=number],select{background:var(--card);border:1px solid var(--strong);color:var(--fg);border-radius:7px;padding:9px 11px;font:inherit;font-size:15.5px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mut{color:var(--mut)}.dim{color:var(--faint)}.good{color:var(--good)}.warn{color:var(--warn)}
+.pill{display:inline-block;border-radius:4px;padding:0 7px;font-size:12.5px;line-height:21px;white-space:nowrap;color:#fff}
+.p-hg{background:var(--hg)}.p-hy{background:var(--hy)}.p-et{background:var(--et)}.p-in{background:var(--in)}.p-lg{background:var(--lg);color:var(--fg)}.p-d{background:var(--soft);color:var(--fg);border:1px solid var(--line)}
+.lnk{all:unset;cursor:pointer;font-weight:700;border-bottom:1px dotted var(--faint);line-height:1.35}
 .lnk:hover{border-bottom-color:var(--fg)}
-.nota{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;border-radius:5px;font-weight:700;font-size:13px;font-variant-numeric:tabular-nums;background:var(--gr);color:var(--gr-i)}
-.nota.n-a{background:var(--ok);color:var(--ok-i)}.nota.n-b{background:var(--hg);color:var(--hg-i)}.nota.n-c{background:var(--hy);color:var(--hy-i)}
-.warn{color:var(--warn)}.good{color:var(--good)}.dim{color:var(--faint)}.mut{color:var(--mut)}
-/* lista */
-.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.chip{border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:16px;padding:6px 13px;font:inherit;font-size:14px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--panel2);color:var(--fg);border-color:var(--strong)}
-details.mais{background:var(--panel);border-radius:8px;padding:10px 14px}
-details.mais summary{cursor:pointer;font-weight:600;color:var(--fg)}
-.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 16px;margin-top:12px}
-.field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.field label{font-size:12.5px;color:var(--mut)}
-.count{color:var(--faint);font-size:13px;margin-left:auto}
-.tbl-wrap{overflow:auto;max-height:74vh;border-top:1px solid var(--line);border-radius:2px}
 table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
-th,td{border-bottom:1px solid var(--line);padding:8px 9px;text-align:right;white-space:nowrap;font-size:13.5px}
-thead th{position:sticky;top:0;background:var(--bg);color:var(--mut);font-weight:500;z-index:2}
-th button{all:unset;cursor:pointer}
-th button .ar{color:var(--faint);font-size:11px;margin-left:3px}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:right;white-space:nowrap;font-size:14.5px}
+th{color:var(--mut);font-weight:600;background:var(--soft)}
 th.l,td.l{text-align:left}
-td.name{white-space:normal;min-width:250px;max-width:360px;position:sticky;left:0;background:var(--bg);z-index:1}
-thead th.name{left:0;z-index:3}
-td.name .tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
-td.name .fl{color:var(--warn);font-size:12.5px;margin-top:3px}
-tbody tr:hover td{background:var(--hover)}
-tbody tr:hover td.name{background:var(--panel)}
-/* cenarios */
-.sc-tabs{display:flex;gap:8px;flex-wrap:wrap}
-.build{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:24px;align-items:start}
-.panel{background:var(--panel);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:14px;min-width:0}
-.panel h3 .num{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:12.5px;align-items:center;justify-content:center;margin-right:6px;font-family:var(--font)}
-.pos{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}
-.pos .ctrl{display:flex;align-items:center;gap:4px}
-.pos input{width:58px;text-align:right;padding:6px}
-.pos .rs{grid-column:1/-1;display:flex;justify-content:space-between;font-size:12.5px;color:var(--mut)}
-.rm{background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;text-decoration:underline}
-.ladder{display:flex;height:16px;border-radius:4px;overflow:hidden;gap:2px;background:var(--bg)}
-.ladder i{display:block;height:100%}
-.lrows{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;font-size:13.5px;font-variant-numeric:tabular-nums}
-.lrows .sw{width:10px;height:10px;border-radius:2px;margin-top:5px}
-.say{font-size:17px;line-height:1.55;max-width:80ch}
-.say b{font-weight:700}
-.res-k{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.seg button{background:transparent;border:none;color:var(--mut);padding:8px 14px;font:inherit;font-size:14px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:var(--panel2);color:var(--fg);font-weight:600}
+.tw{overflow-x:auto}
+.alloc td.name{white-space:normal;min-width:220px}
+.alloc input{width:78px;text-align:right;padding:7px 8px}
+.alloc tr.tot td{font-weight:700;background:var(--soft)}
+.alloc tr.disp td{color:var(--mut)}
+.rm{background:none;border:none;color:var(--mut);cursor:pointer;font-size:14px;text-decoration:underline;font-family:inherit}
+.search{position:relative;flex:1;min-width:240px;max-width:560px}
+.search input{width:100%}
+.dd{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--card);border:1px solid var(--strong);border-radius:8px;box-shadow:0 8px 24px rgba(22,24,28,.12);z-index:25;max-height:360px;overflow:auto}
+.dd button{all:unset;display:flex;justify-content:space-between;gap:10px;width:100%;box-sizing:border-box;padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line);font-size:14.5px}
+.dd button:hover,.dd button:focus{background:var(--soft)}
+.say{font-size:19px;line-height:1.5;margin:0;max-width:85ch}
+.say b{color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.kpi{background:var(--soft);border-radius:8px;padding:12px 14px}
+.kpi .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent)}
+.kpi .k{font-size:13px;color:var(--mut)}
+.seg{display:inline-flex;border:1px solid var(--strong);border-radius:8px;overflow:hidden;background:var(--card)}
+.seg button{background:transparent;border:none;color:var(--mut);padding:7px 12px;font:inherit;font-size:14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#fff;font-weight:700}
 .chart{position:relative}
 .chart svg{width:100%;height:290px;display:block}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--mut)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--mut)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
-.legend i{display:inline-block;width:16px;height:0;border-top:2px solid var(--c)}
+.legend i{display:inline-block;width:18px;border-top:2px solid var(--c)}
 .legend i.d{border-top-style:dashed}
-.tip{position:absolute;z-index:70;pointer-events:none;background:var(--tip);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-variant-numeric:tabular-nums;min-width:180px;box-shadow:var(--shadow)}
-.tip .r{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tip{position:absolute;z-index:70;pointer-events:none;background:#fff;border:1px solid var(--strong);border-radius:8px;padding:8px 10px;font-size:13.5px;font-variant-numeric:tabular-nums;min-width:190px;box-shadow:0 8px 24px rgba(22,24,28,.14)}
+.tip .r{display:flex;justify-content:space-between;gap:10px;align-items:center}
 .tip .key{display:inline-block;width:12px;border-top:2px solid;margin-right:6px;vertical-align:middle}
-.note{font-size:13px;color:var(--mut)}
-.empty{border:1px dashed var(--strong);border-radius:10px;padding:22px;color:var(--mut);display:flex;flex-direction:column;gap:10px;align-items:flex-start}
-/* mapa */
-.hm-wrap{overflow:auto;max-height:76vh;border-top:1px solid var(--line)}
-.hm{display:grid;gap:2px;font-size:11px;font-variant-numeric:tabular-nums;padding-top:6px}
-.hm .nm{position:sticky;left:0;background:var(--bg);padding-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;line-height:18px;z-index:1}
-.hm .mh{color:var(--faint);text-align:center;font-size:10px;white-space:nowrap}
-.hm .c{height:18px;border-radius:2px}
-.hm-leg{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--mut);flex-wrap:wrap}
-.hm-leg i{display:inline-block;width:22px;height:12px;border-radius:2px}
-/* ficha */
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;justify-content:flex-end}
-.fx{background:var(--bg);width:min(720px,100%);height:100%;overflow:auto;padding:22px max(18px,env(safe-area-inset-right,0px)) 40px 22px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px}
-.fx>*{flex-shrink:0}
-.fx .hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-.kv{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr);gap:6px 14px;font-size:14px}
-.kv dt{color:var(--mut)}.kv dd{margin:0}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;z-index:60;box-shadow:var(--shadow);font-size:14.5px}
-.notes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 36px;max-width:1200px}
-.notes p,.notes li{color:var(--mut);font-size:14.5px;margin:0 0 6px;max-width:72ch}
-.notes ul{padding-left:18px;margin:0}
-.notes b{color:var(--fg)}
-.hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.sug{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.sg{background:var(--panel);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0;border-top:3px solid var(--c)}
-.sg h3{margin:0}.sg .obj{color:var(--mut);font-size:14px;margin:0}
-.sg .a{display:grid;grid-template-columns:46px minmax(0,1fr);gap:8px;align-items:start;padding:8px 0;border-top:1px solid var(--line)}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.ladder{display:flex;height:18px;border-radius:5px;overflow:hidden;gap:2px;background:var(--soft)}
+.ladder i{display:block;height:100%}
+.lrows{display:grid;grid-template-columns:auto 1fr auto;gap:6px 10px;font-size:14.5px;font-variant-numeric:tabular-nums}
+.lrows .sw{width:11px;height:11px;border-radius:2px;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.extra{border-left:4px solid var(--accent)}
+.extra ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
+.extra li{max-width:95ch}
+.empty{border:1px dashed var(--strong);border-radius:10px;padding:20px;color:var(--mut)}
+.note{font-size:13.5px;color:var(--mut)}
+.mgrid td.n{color:var(--faint)}
+.mgrid td.lo{color:var(--warn);font-weight:700}
+.sugs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sg{border-top:4px solid var(--c)}
+.sg .a{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;padding:8px 0;border-top:1px solid var(--line)}
 .sg .a .w{font-weight:700;font-size:17px;font-variant-numeric:tabular-nums}
-.sg .a p{margin:3px 0 0;color:var(--mut);font-size:13px}
-.sg .big{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.callout{background:var(--panel);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px}
-.callout p{margin:0;color:var(--mut);max-width:110ch}.callout b{color:var(--fg)}
-.lcards{display:flex;flex-direction:column;gap:8px}
-.lc{background:var(--panel);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px}
-.lc .row{display:flex;justify-content:space-between;gap:8px;font-size:13.5px;color:var(--mut);font-variant-numeric:tabular-nums}
-.lc .row b{color:var(--fg)}
+.sg .a p{margin:2px 0 0;color:var(--mut);font-size:13.5px}
+.ov{position:fixed;inset:0;background:rgba(22,24,28,.45);z-index:50;display:flex;justify-content:flex-end}
+.fx{background:var(--bg);width:min(760px,100%);height:100%;overflow:auto;padding:20px max(18px,env(safe-area-inset-right,0px)) 40px 20px;display:flex;flex-direction:column;gap:14px}
+.fx>*{flex-shrink:0}
+.kv{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:7px 14px;font-size:14.5px}
+.kv dt{color:var(--mut)}.kv dd{margin:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 16px;border-radius:8px;z-index:60;font-size:15px;box-shadow:0 8px 24px rgba(22,24,28,.2)}
+.lc{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--card)}
+.lc .r{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--mut)}
+.lc .r b{color:var(--fg)}
+.nota{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:22px;border-radius:5px;font-weight:700;font-size:13px;background:var(--soft);border:1px solid var(--line)}
+@media (max-width:900px){.sugs,.grid2{grid-template-columns:minmax(0,1fr)}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 :root[data-tela="celular"] .wrap{max-width:520px}
-:root[data-tela="celular"] h1{font-size:28px}
-:root[data-tela="celular"] .steps,:root[data-tela="celular"] .board,:root[data-tela="celular"] .sug,:root[data-tela="celular"] .build,:root[data-tela="celular"] .notes,:root[data-tela="celular"] .fgrid{grid-template-columns:minmax(0,1fr)}
-:root[data-tela="celular"] .res-k{grid-template-columns:repeat(2,minmax(0,1fr))}
+:root[data-tela="celular"] h1{font-size:27px}
+:root[data-tela="celular"] .sugs,:root[data-tela="celular"] .grid2{grid-template-columns:minmax(0,1fr)}
+:root[data-tela="celular"] .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+:root[data-tela="celular"] .say{font-size:17px}
+:root[data-tela="celular"] .card{padding:14px}
+:root[data-tela="celular"] .hide-cel,:root[data-tela="celular"] .only-desk{display:none!important}
+.only-cel{display:none!important}
+:root[data-tela="celular"] .only-cel{display:revert!important}
+:root[data-tela="celular"] nav.tabs{flex-wrap:wrap;gap:4px}
+:root[data-tela="celular"] .tab{padding:8px 11px;font-size:15px}
+:root[data-tela="celular"] th,:root[data-tela="celular"] td{padding:8px 6px;font-size:14px}
+:root[data-tela="celular"] .ptab td.l{white-space:normal}
+:root[data-tela="celular"] .seg button{padding:7px 10px}
+.mgrid td:first-child,.mgrid th:first-child{position:sticky;left:0;background:var(--card);z-index:1}
+.mgrid th:first-child{background:var(--soft)}
+.mc{display:flex;flex-direction:column;gap:10px}
+.mc .lc .r span{min-width:0}
+:root[data-tela="celular"] .alloc td.name{min-width:0}
 :root[data-tela="celular"] .kv{grid-template-columns:minmax(0,1fr)}
 :root[data-tela="celular"] .chart svg{height:240px}
-:root[data-tela="celular"] header.top{flex-direction:column}
-:root[data-tela="celular"] .hdr-r{align-items:flex-start}
-:root[data-tela="celular"] .fx{width:100%}
-:root[data-modo="cliente"] .interno{display:none!important}
-@media (max-width:1150px){.sug{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:repeat(2,minmax(0,1fr))}.build{grid-template-columns:minmax(0,1fr)}.fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:720px){
-  h1{font-size:28px}.steps{grid-template-columns:minmax(0,1fr)}.board{grid-template-columns:minmax(0,1fr)}
-  .res-k{grid-template-columns:repeat(2,minmax(0,1fr))}.notes{grid-template-columns:minmax(0,1fr)}.fgrid{grid-template-columns:minmax(0,1fr)}
-  td.name{min-width:190px;max-width:220px}.kv{grid-template-columns:minmax(0,1fr)}.kv dt{margin-top:6px}
-  .chart svg{height:240px}
-}
+:root[data-tela="celular"] .search{min-width:0}
+@media print{nav.tabs,.noprint,.btn,.seg,.search,.rm{display:none!important}body{background:#fff}.card{break-inside:avoid;border-color:#ddd}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -202,135 +141,52 @@ tbody tr:hover td.name{background:var(--panel)}
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>Seleção de Crédito PJ</h1>
-      <p class="sub">Fundos de crédito high grade e high yield da XP e ETFs de renda fixa da B3, com o histórico de cada ano e um simulador de cenários mês a mês. Dados até 14/10/2026.</p>
+      <h1>Simulador de Crédito PJ</h1>
+      <p class="sub">Monte a carteira, veja o histórico real mês a mês e compare com o FIDC. Fundos da XP e ETFs da B3, dados até 14/10/2026.</p>
     </div>
-    <div class="hdr-r">
-      <div class="seg" role="group" aria-label="Ver como" id="telaSeg"><button data-t="computador">Versão computador</button><button data-t="celular">Versão celular</button></div>
-      <label class="modo"><input type="checkbox" id="mCli"> Modo cliente</label>
-    </div>
+    <div class="seg noprint" role="group" aria-label="Ver como" id="telaSeg"><button data-t="computador">Computador</button><button data-t="celular">Celular</button></div>
   </header>
 
   <nav class="tabs" role="tablist" aria-label="Seções">
-    <button class="tab" role="tab" data-tab="destaques">Destaques</button>
-    <button class="tab" role="tab" data-tab="sugestao">Sugestão do estrategista</button>
-    <button class="tab" role="tab" data-tab="lista">Lista completa</button>
-    <button class="tab" role="tab" data-tab="cenario">Montar cenário <span class="n" id="tN"></span></button>
-    <button class="tab" role="tab" data-tab="comparar">Comparar cenários</button>
-    <button class="tab" role="tab" data-tab="lado">Lado a lado <span class="n" id="lN"></span></button>
-    <button class="tab" role="tab" data-tab="mapa">Mês a mês</button>
+    <button class="tab" role="tab" data-tab="sim">Simulador</button>
+    <button class="tab" role="tab" data-tab="sug"><span class="only-desk">Sugestões do estrategista</span><span class="only-cel">Sugestões</span></button>
+    <button class="tab" role="tab" data-tab="cmp">Comparar</button>
     <button class="tab" role="tab" data-tab="ajuda">Como ler</button>
   </nav>
 
-  <section data-panel="destaques">
-    <div class="steps">
-      <div class="step"><b class="num">1</b><p><strong>Escolha os ativos</strong>Veja os destaques abaixo ou procure na Lista completa. Clique no nome para abrir a ficha.</p></div>
-      <div class="step"><b class="num">2</b><p><strong>Monte o cenário</strong>Clique em "+ Cenário 1" (ou 2, ou 3). Depois, na aba Montar cenário, coloque o valor e os pesos.</p></div>
-      <div class="step"><b class="num">3</b><p><strong>Veja o resultado</strong>Quanto o dinheiro teria rendido mês a mês, antes e depois do IR, e quanto dá para resgatar rápido.</p></div>
+  <section data-panel="sim">
+    <div class="card">
+      <h2><span class="num">1</span>Valor da simulação</h2>
+      <div class="row"><span class="mut">R$</span><input type="text" id="val" inputmode="numeric" aria-label="Valor da simulação em reais" style="width:180px"><span id="valBtns" class="row"></span></div>
+      <div class="row noprint"><span class="mut">Começar por uma sugestão:</span><span id="quick" class="row"></span></div>
     </div>
-    <div class="kpis" id="kpis"></div>
-    <div><h2>Melhores notas de cada grupo</h2><p class="lead">A nota vai de 0 a 10 e junta retorno, constância, queda e oscilação. Clique no nome para ver tudo sobre o ativo.</p></div>
-    <div class="board" id="board"></div>
-  </section>
-
-  <section data-panel="sugestao" hidden>
-    <div><h2>Sugestão do estrategista</h2><p class="lead">Três caminhos para tirar o cliente do FIDC com menos risco, resgate em até 35 dias e três ativos em cada um. Toque em "Abrir no simulador" para ver o mês a mês, antes e depois do IR.</p></div>
-    <div id="sugBox" style="display:flex;flex-direction:column;gap:18px"></div>
-  </section>
-
-  <section data-panel="lista" hidden>
-    <div><h2>Lista completa</h2><p class="lead">Use os botões para escolher o tipo. Para ordenar, escolha em "Ordenar por" ou clique no título da coluna. Clique no nome para abrir a ficha.</p></div>
-    <div class="bar" role="group" aria-label="Tipo">
-      <button class="chip" data-cat="High Grade" aria-pressed="true">High Grade</button>
-      <button class="chip" data-cat="High Yield" aria-pressed="true">High Yield</button>
-      <button class="chip" data-cat="ETF" aria-pressed="true">ETFs</button>
-      <button class="chip" data-cat="Infra CDI" aria-pressed="false">Infra CDI</button>
-      <button class="chip" data-cat="Liquidez longa" aria-pressed="false">Prazo longo (FIDC e afins)</button>
+    <div class="card">
+      <div class="card-h"><h2><span class="num">2</span>Ativos e percentual</h2><button class="btn sm noprint" id="all">Ver todos os ativos</button></div>
+      <div class="search noprint"><input type="search" id="q" placeholder="Buscar fundo ou ETF pelo nome ou código" aria-label="Buscar ativo" autocomplete="off"><div class="dd" id="dd" hidden></div></div>
+      <div class="tw"><table class="alloc" id="alloc"></table></div>
+      <div class="row noprint"><button class="btn sm" id="eq">Dividir igual</button><button class="btn sm" id="clr">Limpar</button></div>
     </div>
-    <div class="bar">
-      <input type="search" id="fq" placeholder="Buscar por nome, gestora ou código" aria-label="Buscar" style="min-width:240px;flex:1;max-width:420px">
-      <label class="mut" for="fSort" style="font-size:14px">Ordenar por</label>
-      <select id="fSort"></select>
-      <button class="btn sm" id="fDir"></button>
-      <select id="fMode" aria-label="Mostrar retornos"><option value="cdi">Retorno em % do CDI</option><option value="pct">Retorno em %</option></select>
-      <button class="btn sm" id="fCols">Mostrar mais colunas</button>
-      <span class="count" id="count"></span>
-    </div>
-    <details class="mais" id="mais">
-      <summary>Mais filtros</summary>
-      <div class="fgrid">
-        <div class="field"><label for="f12">Rendeu em 12 meses no mínimo (% do CDI)</label><input type="number" id="f12" placeholder="ex.: 100"></div>
-        <div class="field"><label for="f36">Rendeu em 3 anos no mínimo (% do CDI)</label><input type="number" id="f36" placeholder="ex.: 105"></div>
-        <div class="field"><label for="fDD">Queda máxima de até (%)</label><input type="number" id="fDD" placeholder="ex.: 1" step="0.1"></div>
-        <div class="field"><label for="fLiq">Resgate em até</label><select id="fLiq"><option value="999">Qualquer prazo</option><option value="1">1 dia</option><option value="15">15 dias</option><option value="35">35 dias</option></select></div>
-        <div class="field"><label for="fNota">Nota de no mínimo</label><input type="number" id="fNota" placeholder="ex.: 6" step="0.5"></div>
-        <div class="field"><label for="fTx">Taxa de administração de até (% ao ano)</label><input type="number" id="fTx" placeholder="ex.: 0,8" step="0.05"></div>
-        <div class="field"><label for="fPL">Patrimônio de no mínimo (R$ milhões)</label><input type="number" id="fPL" placeholder="ex.: 200"></div>
-        <div class="field"><label for="fHist">Histórico mínimo</label><select id="fHist"><option value="0">Qualquer</option><option value="12">1 ano</option><option value="36">3 anos</option></select></div>
-        <div class="field interno"><label><input type="checkbox" id="fMax"> Só os indicados do Max</label></div>
-        <div class="field"><button class="btn sm" id="fClear">Limpar filtros</button></div>
-      </div>
-    </details>
-    <div class="tbl-wrap" id="tblWrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
-    <div class="lcards" id="lcards" hidden></div>
+    <div id="res" style="display:flex;flex-direction:column;gap:16px"></div>
   </section>
 
-  <section data-panel="cenario" hidden>
-    <div><h2>Montar cenário</h2><p class="lead">Simula com o histórico real, mês a mês. Cada parte rende por conta própria (sem rebalancear). O período começa quando todos os ativos escolhidos já existiam.</p></div>
-    <div class="sc-tabs" id="scTabs"></div>
-    <div class="build">
-      <div class="panel" id="bLeft"></div>
-      <div style="min-width:0;display:flex;flex-direction:column;gap:16px" id="bRight"></div>
-    </div>
-  </section>
-
-  <section data-panel="comparar" hidden>
-    <div><h2>Comparar cenários</h2><p class="lead">Os cenários preenchidos, lado a lado, no mesmo período (o período em que todos os ativos de todos os cenários já existiam).</p></div>
-    <div id="cmp"></div>
-  </section>
-
-  <section data-panel="lado" hidden>
-    <div><h2>Lado a lado</h2><p class="lead">Escolha até 4 ativos para ver juntos. Use o botão "Comparar" na ficha ou busque aqui.</p></div>
-    <div class="bar"><input type="search" id="ldAdd" list="dl" placeholder="Adicionar ativo para comparar" style="min-width:260px;flex:1;max-width:460px" aria-label="Adicionar ativo para comparar"><button class="btn sm" id="ldClear">Limpar</button></div>
-    <div id="lado"></div>
-  </section>
-
-  <section data-panel="mapa" hidden>
-    <div><h2>Mês a mês</h2><p class="lead">Cada quadrinho é um mês. Verde: bateu o CDI. Laranja: ficou abaixo. Quanto mais forte a cor, maior a diferença. Passe o mouse (ou toque) num quadrinho para ver os números.</p></div>
-    <div class="bar"><label class="mut" for="hmSel" style="font-size:14px">Mostrar</label><select id="hmSel"><option value="nota">As 30 melhores notas</option><option value="cen">Ativos do cenário aberto</option><option value="lado">Ativos do Lado a lado</option><option value="lista">A Lista completa com os filtros (até 60)</option></select></div>
-    <div class="hm-leg"><span>Abaixo do CDI</span><i style="background:rgba(var(--hm-bad),.75)"></i><i style="background:rgba(var(--hm-bad),.35)"></i><i style="background:var(--hm-mid)"></i><i style="background:rgba(var(--hm-good),.35)"></i><i style="background:rgba(var(--hm-good),.75)"></i><span>Acima do CDI</span></div>
-    <div class="hm-wrap" id="hmWrap"><div class="hm" id="hm"></div></div>
-  </section>
+  <section data-panel="sug" hidden></section>
+  <section data-panel="cmp" hidden></section>
 
   <section data-panel="ajuda" hidden>
-    <h2>Como ler</h2>
-    <div class="notes">
-      <div><h3>De onde vêm os números</h3>
-        <p>Fundos: cota diária oficial da CVM, conferida com o retorno de 12 meses da planilha da XP. ETFs: preço de fechamento na B3. CDI: Banco Central.</p>
-        <p>A cota do fundo já vem <b>descontada da taxa de administração e da performance</b>. O que ainda falta tirar é o imposto. Por isso o simulador mostra "antes do IR" e "depois do IR".</p></div>
-      <div><h3>O que é a nota</h3>
-        <p>Vai de 0 a 10 e compara cada ativo com todos os outros da lista. Pesa 40% o retorno sobre o CDI (3 anos, ou o que existir), 25% os meses em que bateu o CDI, 20% a maior queda e 15% a oscilação. Quem tem menos de 3 anos de história perde pontos.</p></div>
-      <div><h3>Imposto para empresa (PJ)</h3>
-        <ul>
-          <li><b>Fundos de crédito:</b> come-cotas em maio e novembro (15%) e, no resgate, o restante até a alíquota do prazo: 22,5% até 6 meses, 20% até 1 ano, 17,5% até 2 anos e 15% depois.</li>
-          <li><b>ETFs de renda fixa:</b> não têm come-cotas nem IOF. O IR sai na venda: 15% na maioria. Os de Tesouro Selic puro (LFTS11 e parecidos) pagam 25%. Os de crédito DI ainda precisam ser confirmados no regulamento (o simulador usa 25%).</li>
-          <li><b>Infra incentivado:</b> a empresa paga 15%. A isenção é só da pessoa física.</li>
-          <li><b>Atenção:</b> para empresa do lucro real ou presumido, o IR retido na fonte é um adiantamento, que ela desconta do imposto dela no fim. A alíquota menor ajuda no caixa, mas o imposto final é o da empresa. Vale validar com o contador do cliente.</li>
-        </ul></div>
-      <div><h3>Palavras da tabela</h3>
-        <ul>
-          <li><b>Resgate:</b> quantos dias, mais ou menos, até o dinheiro cair na conta.</li>
-          <li><b>Queda máx.:</b> a maior queda que a cota teve de um fim de mês para outro.</li>
-          <li><b>Oscilação:</b> o quanto o retorno varia ao longo do ano. Quanto menor, mais estável.</li>
-          <li><b>Meses no CDI:</b> em quantos dos últimos 36 meses o ativo empatou ou bateu o CDI.</li>
-          <li><b>Patrimônio / giro:</b> tamanho do fundo em R$ milhões. No ETF, quanto ele negocia por dia na bolsa.</li>
-          <li><b>High yield:</b> estratégia de risco maior (multimercado crédito, FIDC, crédito estruturado), nota de risco da XP 12 ou mais, ou 112% do CDI ou mais em 3 anos.</li>
-        </ul></div>
+    <div class="card">
+      <h2>Como ler</h2>
+      <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;max-width:95ch">
+        <li><b>De onde vêm os números:</b> fundos pela cota diária oficial da CVM (conferida com o retorno de 12 meses da XP), ETFs pelo preço de fechamento na B3 e CDI pelo Banco Central.</li>
+        <li><b>Como o simulador calcula:</b> cada ativo rende por conta própria, mês a mês, sem rebalancear. O período começa quando todos os ativos escolhidos já existiam, para não misturar histórico.</li>
+        <li><b>Taxas:</b> a cota já vem descontada da taxa de administração e da performance. O que falta tirar é o imposto.</li>
+        <li><b>Imposto da empresa:</b> com faturamento de R$ 3 bilhões, a empresa é obrigada ao lucro real (o limite é R$ 78 milhões por ano). O rendimento de qualquer opção, inclusive do FIDC, entra no imposto da empresa (IRPJ e CSLL de até 34%, mais 4,65% de PIS e COFINS). O IR retido na fonte é descontado depois, então ele mexe no caixa e não no imposto final. Confirmar com o contador.</li>
+        <li><b>FIDC de referência:</b> mediana dos FIDCs da planilha da XP em 12 meses (15,74%). O resgate deles vai de 30 a 360 dias.</li>
+        <li><b>Nota:</b> de 0 a 10, junta retorno sobre o CDI, meses acima do CDI, maior queda e oscilação, comparando com todos os ativos da lista.</li>
+      </ul>
     </div>
   </section>
 </div>
-<datalist id="dl"></datalist>
-<div class="ov" id="ov" hidden><div class="fx" id="fx" role="dialog" aria-modal="true" aria-labelledby="fxT"></div></div>
+<div class="ov" id="ov" hidden><div class="fx" id="fx" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast" hidden></div>
 <div class="tip" id="tip" hidden></div>
 
@@ -344,393 +200,287 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 function h(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const[k,v]of Object.entries(attrs)){if(v==null||v===false)continue;if(k==='class')e.className=v;else if(k==='text')e.textContent=v;else if(k==='style')e.style.cssText=v;else if(k.startsWith('on'))e.addEventListener(k.slice(2),v);else e.setAttribute(k,v===true?'':v)}for(const c of kids.flat(9)){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(String(c)))}return e}
 const nf=(x,d=1)=>x==null||!isFinite(x)?'–':x.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d});
 const brl=x=>x==null||!isFinite(x)?'–':x.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
-const mi=x=>'R$ '+nf(x/1e6,x%1e6?2:0)+' mi';
 const MES=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+const MESL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 const ml=k=>MES[+k.slice(4)-1]+'/'+k.slice(2,4);
-const dbr=s=>s?s.split('-').reverse().join('/'):'';
 const pcdi=p=>p&&p[1]>0?p[0]/p[1]*100:null;
-const catKey=c=>c.startsWith('ETF')?'ETF':c;
-const pillOf=c=>({'High Grade':'p-hg','High Yield':'p-hy','Infra CDI':'p-in','Liquidez longa':'p-gr'})[c]||'p-et';
-const catLabel=c=>c==='Liquidez longa'?'Prazo longo':c;
 const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const short=i=>i.tk||i.n.replace(/\b(FIF|FIC|FI|CIC|CI|RF|CP|LP|RL|FIRF|de|em|Cotas|Resp|Limitada|Responsabilidade|Classe|Investimento|Financeiro|Subclasse)\b/gi,'').replace(/\s+/g,' ').trim().split(' ').slice(0,3).join(' ');
+const pick=n=>IT.find(i=>i.n===n||i.tk===n);
+const pillOf=c=>({'High Grade':'p-hg','High Yield':'p-hy','Infra CDI':'p-in','Liquidez longa':'p-lg'})[c]||'p-et';
+const catLabel=c=>c==='Liquidez longa'?'Prazo longo':c.replace('ETF · ','ETF ');
+const short=i=>i.tk||i.n.replace(/\s[-–]\s.*$/,'').replace(/\b(FIF|FIC|FI|CIC|CI|RF|CP|LP|RL|FIRF|de|em|Cotas|Resp|Limitada|Responsabilidade|Classe|Investimento|Financeiro|Subclasse)\b/gi,'').replace(/\s+/g,' ').trim().split(' ').slice(0,3).join(' ');
+const FIDC_MED=15.74, FIDC_MIN=-43.81, CDI12=D.cdiY['12M'], FIDC_PC=FIDC_MED/CDI12;
+const fidcEq=w=>w.c*FIDC_PC;
+function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
+
+// ---------- sugestões ----------
+const SUG=[
+ {n:'Sugestão 1',t:'Segurança máxima',c:'--s1',obj:'Tudo resgatável em até 1 dia: título público e fundos de crédito bancário e referenciado DI com nota de risco 2 da XP.',
+  pos:[['LFTS11',30,'Tesouro Selic na bolsa. Risco do governo, vende em 1 dia.'],['XP Bancos FIRF Referenciada DI CP RL',35,'Crédito de bancos, resgate no mesmo dia. Na crise de crédito de 2023 rendeu 100% do CDI.'],['Mapfre Confianza FIF RF Referenciado DI CP RL',35,'Fundo de R$ 19 bilhões, resgate no mesmo dia, 109% do CDI em 3 anos.']]},
+ {n:'Sugestão 2',t:'Equilíbrio',c:'--s2',obj:'Um terço em título público e o resto em crédito de alta qualidade de fundos grandes. Tudo em até 10 dias.',
+  pos:[['LFTB11',35,'Tesouro Selic + IPCA na bolsa, vende em 1 dia. 104% do CDI em 12 meses.'],['ARX Fuji FIC de FIF RF CP RL',35,'Crédito high grade, R$ 9,7 bilhões, resgate em 1 dia, 108% do CDI em 3 anos.'],['BNP Paribas Rubi FIF RF CP RL',30,'Crédito high grade, R$ 4 bilhões, resgate em 10 dias, 96% do CDI na crise de 2023.']]},
+ {n:'Sugestão 3',t:'Mais rendimento, ainda líquido',c:'--s3',obj:'A mais perto do que o FIDC paga, com resgate em até 32 dias e 30% em título público como colchão.',
+  pos:[['Compass Yield 30 FIF RF CP LP RL',40,'114% do CDI em 3 anos, R$ 2,1 bilhões, resgate em 30 dias. 94% do CDI na crise de 2023.'],['M8 Capital Plus FI RF CP RL LP',30,'110% do CDI em 3 anos, resgate em 32 dias. Sentiu a crise de 2023 (60% do CDI).'],['LFTB11',30,'Tesouro Selic + IPCA na bolsa: segurança e caixa em 1 dia.']]}];
+SUG.forEach(s=>s.items=s.pos.map(([n,w,why])=>({i:pick(n),w,why})).filter(x=>x.i));
+const sugPos=s=>s.items.map(x=>({id:x.i.id,w:x.w}));
 
 // ---------- estado ----------
-const pick=n=>IT.find(i=>i.n===n||i.tk===n);
-const MAXP=['Compass Yield 30 FIF RF CP LP RL','Polo Total Credit FIF Multimercado CP RL','Brave Iron FIRF CP RL','LFTS11'].map(pick).filter(Boolean);
-let ST=store.get('cpj.v2',null);
-if(!ST||!Array.isArray(ST.sc)||ST.sc.length!==3){
-  ST={tab:'destaques',cur:0,liq:'bruto',cols:false,lado:MAXP.map(i=>i.id),sc:[{val:5000000,pos:MAXP.map(i=>({id:i.id,w:25}))},{val:5000000,pos:[]},{val:5000000,pos:[]}]};
-}
-ST.sc.forEach(s=>s.pos=s.pos.filter(p=>BYID[p.id]));ST.lado=(ST.lado||[]).filter(id=>BYID[id]);
-const save=()=>store.set('cpj.v2',ST);
-const F={cats:new Set(['High Grade','High Yield','ETF']),q:'',sort:'nota',dir:-1,mode:'cdi',f12:null,f36:null,dd:null,liq:999,nota:null,tx:null,pl:null,hist:0,max:false};
+let ST=store.get('cpj.v3',null);
+if(!ST||!Array.isArray(ST.pos)){ST={val:5000000,pos:sugPos(SUG[2]),from:'Sugestão 3',tab:'sim'}}
+ST.pos=ST.pos.filter(p=>BYID[p.id]);
+const save=()=>store.set('cpj.v3',ST);
+const wsum=()=>ST.pos.reduce((s,p)=>s+(+p.w||0),0);
+function eq(){const n=ST.pos.length;if(!n)return;const w=Math.floor(10000/n)/100;ST.pos.forEach((p,j)=>p.w=j===n-1?Math.round((100-w*(n-1))*100)/100:w)}
+function addAsset(id){if(ST.pos.some(p=>p.id===id)){toast('Já está na carteira');return}const left=Math.max(0,Math.round((100-wsum())*100)/100);ST.pos.push({id,w:left});ST.from=null;save();toast(left>0?'Adicionado: '+short(BYID[id]):'Adicionado com 0%. Ajuste os percentuais ou use Dividir igual');renderSim()}
+function remAsset(id){ST.pos=ST.pos.filter(p=>p.id!==id);ST.from=null;save();renderSim()}
+function loadSug(j){ST.pos=sugPos(SUG[j]);ST.from=SUG[j].n;save()}
 
-function toast(t){const el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
-function eq(sc){const n=sc.pos.length;if(!n)return;const w=Math.floor(10000/n)/100;sc.pos.forEach((p,j)=>p.w=j===n-1?Math.round((100-w*(n-1))*100)/100:w)}
-const inSc=(id,n=ST.cur)=>ST.sc[n].pos.some(p=>p.id===id);
-function addSc(id,n=ST.cur){const sc=ST.sc[n];if(sc.pos.some(p=>p.id===id)){toast('Já está no Cenário '+(n+1));return}sc.pos.push({id,w:0});eq(sc);save();toast('Adicionado ao Cenário '+(n+1));refresh()}
-function remSc(id,n=ST.cur){const sc=ST.sc[n];sc.pos=sc.pos.filter(p=>p.id!==id);eq(sc);save();refresh()}
-function addBtn(i,small){const on=inSc(i.id);return h('button',{class:'btn '+(small?'sm':'sm')+(on?' on':''),title:on?'Já está no Cenário '+(ST.cur+1):'Pôr no Cenário '+(ST.cur+1),onclick:e=>{e.stopPropagation();on?remSc(i.id):addSc(i.id)}},on?'✓ No cenário '+(ST.cur+1):'+ Cenário '+(ST.cur+1))}
-function ladoToggle(id){const k=ST.lado.indexOf(id);if(k>=0)ST.lado.splice(k,1);else{if(ST.lado.length>=4){toast('Lado a lado aceita até 4. Tire um antes.');return}ST.lado.push(id);toast('Adicionado ao Lado a lado')}save();refresh()}
-function notaEl(v){if(v==null)return h('span',{class:'nota',title:'Sem histórico suficiente',text:'–'});return h('span',{class:'nota '+(v>=7?'n-a':v>=4?'n-b':'n-c'),title:'Nota de 0 a 10',text:nf(v,1)})}
-function tags(i){const t=[h('span',{class:'pill '+pillOf(i.c),text:i.t==='ETF'?i.c:catLabel(i.c)})];if(i.max)t.push(h('span',{class:'pill p-ok interno',text:'Max'}));return t}
-const nameLink=i=>h('button',{class:'lnk',onclick:()=>openFicha(i.id),text:i.n});
-
-// ---------- imposto ----------
+// ---------- imposto e simulação ----------
 function finalRate(reg,days,irr){if(reg==='lp')return days<=180?.225:days<=360?.20:days<=720?.175:.15;if(reg==='cp')return days<=180?.225:.20;if(reg==='infra')return .15;return (irr||15)/100}
-function makePos(a,reg,irr){return {a,reg,irr,P:1,u:1,B:1,cc:0}}
-function stepPos(ps,r,k){ps.P*=1+r;if((ps.reg==='lp'||ps.reg==='cp')&&(k.endsWith('05')||k.endsWith('11'))){const g=ps.P-ps.B;if(g>0){const rate=ps.reg==='cp'?.20:.15;const tax=rate*g*ps.u*ps.a;ps.cc+=g*ps.u*ps.a;ps.u-=tax/(ps.P*ps.a);ps.B=ps.P}}}
-function netPos(ps,days){const v=ps.a*ps.u*ps.P;let t;const f=finalRate(ps.reg,days,ps.irr);if(ps.reg==='lp'||ps.reg==='cp'){t=Math.max(0,f*(ps.P-ps.B)*ps.u*ps.a)+Math.max(0,f-(ps.reg==='cp'?.20:.15))*ps.cc}else t=f*Math.max(0,ps.P-1)*ps.a;return v-t}
-const irText=i=>i.reg==='etf'?('IR de '+i.irr+'% na venda, sem come-cotas e sem IOF'+(/Crédito DI|exterior/.test(i.c)?' (alíquota a confirmar)':'')):i.reg==='infra'?'PJ paga 15% no resgate, sem come-cotas':i.reg==='cp'?'Come-cotas de 20% em maio e novembro; 22,5% ou 20% no resgate':'Come-cotas de 15% em maio e novembro; no resgate, 22,5% a 15% conforme o prazo';
-const ir12=i=>i.reg==='etf'?i.irr/100:i.reg==='infra'?.15:i.reg==='cp'?.20:.175;
-
-// ---------- simulação ----------
-function sim(sc,force){
-  const P=sc.pos.map(p=>({w:+p.w||0,i:BYID[p.id]})).filter(p=>p.i&&p.w>0);
-  if(!P.length||!(sc.val>0))return null;
+function mk(a,reg,irr){return {a,reg,irr,P:1,u:1,B:1,cc:0}}
+function step(ps,r,k){ps.P*=1+r;if((ps.reg==='lp'||ps.reg==='cp')&&(k.endsWith('05')||k.endsWith('11'))){const g=ps.P-ps.B;if(g>0){const rt=ps.reg==='cp'?.20:.15;const tax=rt*g*ps.u*ps.a;ps.cc+=g*ps.u*ps.a;ps.u-=tax/(ps.P*ps.a);ps.B=ps.P}}}
+function net(ps,days){const v=ps.a*ps.u*ps.P;const f=finalRate(ps.reg,days,ps.irr);const t=(ps.reg==='lp'||ps.reg==='cp')?Math.max(0,f*(ps.P-ps.B)*ps.u*ps.a)+Math.max(0,f-(ps.reg==='cp'?.20:.15))*ps.cc:f*Math.max(0,ps.P-1)*ps.a;return v-t}
+function sim(pos,val,force){
+  const P=pos.map(p=>({w:+p.w||0,i:BYID[p.id]})).filter(p=>p.i&&p.w>0);
+  if(!P.length||!(val>0))return null;
   const firsts=P.map(p=>Object.keys(p.i.mr).sort()[0]);
   const lim=firsts.reduce((a,b)=>a>b?a:b);
   const start=force&&force>lim?force:lim;
   const M=MONTHS.filter(k=>k>=start);if(!M.length)return null;
-  const wsum=P.reduce((s,p)=>s+p.w,0);
-  const ps=P.map(p=>makePos(sc.val*p.w/wsum,p.i.reg,p.i.irr)), cd=makePos(sc.val,'lp');
-  let C=sc.val,prevG=sc.val;const gaps=new Set(),rows=[],pts=[{k:null,G:sc.val,N:sc.val,C:sc.val,CN:sc.val}];
-  M.forEach((k,j)=>{
-    const each=P.map((p,x)=>{const m=p.i.mr[k];if(!m)gaps.add(p.i.n);const r=m?m[0]/100:0;stepPos(ps[x],r,k);return r});
-    const c=D.cdiM[k]/100;C*=1+c;stepPos(cd,c,k);
-    const days=(j+(k==='202610'?0.45:1))*30.4;
-    const G=ps.reduce((s,q)=>s+q.a*q.P,0), N=ps.reduce((s,q)=>s+netPos(q,days),0), CN=netPos(cd,days);
-    rows.push({k,r:G/prevG-1,c,gain:G-prevG,G,N,C,CN,each});pts.push({k,G,N,C,CN});prevG=G;
-  });
-  const limiter=P.filter((p,x)=>firsts[x]===lim).map(p=>p.i.n);
-  const rs=rows.map(r=>r.r*100),mu=rs.reduce((a,b)=>a+b,0)/rs.length;
-  const vol=rs.length>2?Math.sqrt(rs.reduce((a,b)=>a+(b-mu)**2,0)/(rs.length-1))*Math.sqrt(12):null;
+  const W=P.reduce((s,p)=>s+p.w,0);
+  const ps=P.map(p=>mk(val*p.w/W,p.i.reg,p.i.irr)),cd=mk(val,'lp');
+  let C=val,prev=val,peak=val,mdd=0;const rows=[],pts=[{k:null,G:val,C:val}];
+  M.forEach((k,j)=>{const each=P.map((p,x)=>{const m=p.i.mr[k];const r=m?m[0]/100:0;step(ps[x],r,k);return r});
+    const c=D.cdiM[k]/100;C*=1+c;step(cd,c,k);const days=(j+(k==='202610'?0.45:1))*30.4;
+    const G=ps.reduce((s,q)=>s+q.a*q.P,0),N=ps.reduce((s,q)=>s+net(q,days),0),CN=net(cd,days);
+    peak=Math.max(peak,G);mdd=Math.min(mdd,G/peak-1);
+    rows.push({k,r:G/prev-1,c,G,N,C,CN,each});pts.push({k,G,C});prev=G});
   const full=rows.filter(r=>r.k!=='202610');
-  const worst=full.length?full.reduce((a,b)=>(b.r-b.c)<(a.r-a.c)?b:a):null;
-  const beat=full.filter(r=>r.r>=r.c-0.00005).length;
-  const lad=[0,0,0,0];P.forEach(p=>{const d=p.i.d,v=sc.val*p.w/wsum;lad[d<=1?0:d<=15?1:d<=35?2:3]+=v});
+  const above=full.filter(r=>r.r>=r.c-0.00005).length;
+  const best=full.length?full.reduce((a,b)=>b.r>a.r?b:a):null, worst=full.length?full.reduce((a,b)=>b.r<a.r?b:a):null;
+  const rs=full.map(r=>r.r*100),mu=rs.reduce((a,b)=>a+b,0)/(rs.length||1);
+  const vol=rs.length>2?Math.sqrt(rs.reduce((a,b)=>a+(b-mu)**2,0)/(rs.length-1))*Math.sqrt(12):null;
+  const lad=[0,0,0,0];P.forEach(p=>{const d=p.i.d;lad[d<=1?0:d<=15?1:d<=35?2:3]+=val*p.w/W});
   const last=rows[rows.length-1];
-  return {P,M,rows,pts,start,lim,limiter,gaps:[...gaps],G:last.G,N:last.N,C:last.C,CN:last.CN,vol,worst,beat,nfull:full.length,lad,val:sc.val,wsum};
+  return {P,W,val,rows,full,pts,start,lim,limiter:P.filter((p,x)=>firsts[x]===lim).map(p=>p.i),G:last.G,N:last.N,C:last.C,CN:last.CN,above,below:full.length-above,best,worst,vol,mdd,lad,maxd:Math.max(...P.map(p=>p.i.d))};
 }
+function win(R,n){const f=R.full;if(f.length<n)return null;const s=f.slice(-n);let a=1,b=1;s.forEach(r=>{a*=1+r.r;b*=1+r.c});return {r:(a-1)*100,c:(b-1)*100,from:s[0].k,to:s[s.length-1].k}}
+function span(R,a,b){const s=R.rows.filter(r=>r.k>=a&&r.k<=b);if(!s.length)return null;let x=1,y=1;s.forEach(r=>{x*=1+r.r;y*=1+r.c});return {r:(x-1)*100,c:(y-1)*100}}
 
-// ---------- gráfico de linhas ----------
+// ---------- gráfico ----------
 function lineChart(box,series,opt){
-  box.replaceChildren();const NS='http://www.w3.org/2000/svg';
-  const svg=document.createElementNS(NS,'svg');svg.setAttribute('role','img');svg.setAttribute('aria-label',opt.label||'Gráfico');box.append(svg);
-  const W=Math.max(300,box.clientWidth||800),H=opt.h||290,L=opt.left||70,R=16,T=12,B=28;svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.style.height=H+'px';
-  const n=series[0].pts.length;const all=series.flatMap(s=>s.pts.map(p=>p.v)).filter(v=>v!=null&&isFinite(v));
-  let lo=Math.min(...all),hi=Math.max(...all);const pad=(hi-lo)*.06||1;lo-=pad;hi+=pad;
-  const X=j=>L+(W-L-R)*j/(n-1||1),Y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));
-  const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
+  box.replaceChildren();const NS='http://www.w3.org/2000/svg';const svg=document.createElementNS(NS,'svg');svg.setAttribute('role','img');svg.setAttribute('aria-label',opt.label);box.append(svg);
+  const W=Math.max(280,box.clientWidth||800),H=opt.h||(W<520?240:290),L=opt.left||46,R=16,T=12,B=28;svg.setAttribute('viewBox','0 0 '+W+' '+H);svg.style.height=H+'px';
+  const n=series[0].pts.length;const all=series.flatMap(s=>s.pts.map(p=>p.v)).filter(v=>isFinite(v));let lo=Math.min(...all),hi=Math.max(...all);const pad=(hi-lo)*.06||1;lo-=pad;hi+=pad;
+  const X=j=>L+(W-L-R)*j/(n-1||1),Y=v=>T+(H-T-B)*(1-(v-lo)/(hi-lo));const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e};
   const ink=css('--mut'),grid=css('--line');
-  for(let t=0;t<=4;t++){const v=lo+(hi-lo)*t/4,y=Y(v);svg.append(el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:grid}));const tx=el('text',{x:L-8,y:y+4,'text-anchor':'end','font-size':'11',fill:ink});tx.textContent=opt.fy(v);svg.append(tx)}
-  const step=Math.max(1,Math.ceil(n/(W<520?4:8)));
-  for(let j=0;j<n;j++){if((j%step===0&&j<=n-1-Math.max(2,Math.ceil(step*0.8)))||j===n-1){const tx=el('text',{x:X(j),y:H-8,'text-anchor':j===0?'start':(j===n-1?'end':'middle'),'font-size':'11',fill:ink});tx.textContent=opt.fx(j);svg.append(tx)}}
-  series.forEach(s=>{const d=s.pts.map((p,j)=>(j?'L':'M')+X(j).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' ');svg.append(el('path',{d,fill:'none',stroke:s.color,'stroke-width':'2','stroke-dasharray':s.dash?'5 4':'none','stroke-linejoin':'round'}))});
-  const bg=css('--bg');
-  series.forEach(s=>{const p=s.pts[n-1];svg.append(el('circle',{cx:X(n-1),cy:Y(p.v),r:'3.5',fill:s.color,stroke:bg,'stroke-width':'2'}))});
-  const cross=el('line',{y1:T,y2:H-B,stroke:css('--strong'),'stroke-width':'1',visibility:'hidden'});svg.append(cross);
-  const dots=series.map(s=>{const c=el('circle',{r:'4',fill:s.color,stroke:bg,'stroke-width':'2',visibility:'hidden'});svg.append(c);return c});
-  const hit=el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'transparent',tabindex:'0'});svg.append(hit);
-  const tip=$('#tip');let kj=n-1;
+  const raw=(hi-lo)/4,mag=Math.pow(10,Math.floor(Math.log10(raw))),stp=[1,2,2.5,5,10].map(m=>m*mag).find(s=>s>=raw);
+  for(let q=Math.ceil(lo/stp);q*stp<=hi+1e-9;q++){const v=q===0?0:q*stp,y=Y(v);svg.append(el('line',{x1:L,x2:W-R,y1:y,y2:y,stroke:grid}));const tx=el('text',{x:L-8,y:y+4,'text-anchor':'end','font-size':'11.5',fill:ink});tx.textContent=opt.fy(v);svg.append(tx)}
+  const stepN=Math.max(1,Math.ceil(n/(W<520?4:8)));
+  for(let j=0;j<n;j++){if((j%stepN===0&&X(n-1)-X(j)>=70)||j===n-1){const tx=el('text',{x:X(j),y:H-8,'text-anchor':j===0?'start':(j===n-1?'end':'middle'),'font-size':'11.5',fill:ink});tx.textContent=opt.fx(j);svg.append(tx)}}
+  series.forEach(s=>svg.append(el('path',{d:s.pts.map((p,j)=>(j?'L':'M')+X(j).toFixed(1)+' '+Y(p.v).toFixed(1)).join(' '),fill:'none',stroke:s.color,'stroke-width':'2.2','stroke-dasharray':s.dash?'5 4':'none','stroke-linejoin':'round'})));
+  series.forEach(s=>svg.append(el('circle',{cx:X(n-1),cy:Y(s.pts[n-1].v),r:'3.5',fill:s.color,stroke:'#fff','stroke-width':'2'})));
+  const cross=el('line',{y1:T,y2:H-B,stroke:css('--strong'),visibility:'hidden'});svg.append(cross);
+  const dots=series.map(s=>{const c=el('circle',{r:'4',fill:s.color,stroke:'#fff','stroke-width':'2',visibility:'hidden'});svg.append(c);return c});
+  const hit=el('rect',{x:L,y:T,width:W-L-R,height:H-T-B,fill:'transparent',tabindex:'0'});svg.append(hit);const tip=$('#tip');let kj=n-1;
   function show(j){j=Math.max(0,Math.min(n-1,j));kj=j;const x=X(j);cross.setAttribute('x1',x);cross.setAttribute('x2',x);cross.setAttribute('visibility','visible');
     series.forEach((s,q)=>{dots[q].setAttribute('cx',x);dots[q].setAttribute('cy',Y(s.pts[j].v));dots[q].setAttribute('visibility','visible')});
-    tip.replaceChildren(h('div',{class:'dim',style:'margin-bottom:4px',text:opt.tx(j)}),...series.map(s=>h('div',{class:'r'},h('b',{text:opt.fv(s.pts[j].v,s)}),h('span',{class:'mut'},h('i',{class:'key',style:'border-top-color:'+s.color+(s.dash?';border-top-style:dashed':'')}),s.name))));
-    tip.hidden=false;const b=svg.getBoundingClientRect(),sx=b.width/W;let left=b.left+window.scrollX+x*sx+14;if(x*sx+230>b.width)left=b.left+window.scrollX+x*sx-240;tip.style.left=left+'px';tip.style.top=(b.top+window.scrollY+8)+'px';tip.style.position='absolute'}
+    tip.replaceChildren(h('div',{class:'dim',style:'margin-bottom:4px',text:opt.tx(j)}),...series.map(s=>h('div',{class:'r'},h('b',{text:opt.fv(s.pts[j].v)}),h('span',{class:'mut'},h('i',{class:'key',style:'border-top-color:'+s.color+(s.dash?';border-top-style:dashed':'')}),s.name))));
+    tip.hidden=false;const b=svg.getBoundingClientRect(),sx=b.width/W;let left=b.left+scrollX+x*sx+14;if(x*sx+240>b.width)left=b.left+scrollX+x*sx-250;tip.style.left=left+'px';tip.style.top=(b.top+scrollY+8)+'px'}
   function hide(){tip.hidden=true;cross.setAttribute('visibility','hidden');dots.forEach(d=>d.setAttribute('visibility','hidden'))}
-  const pick=e=>{const b=svg.getBoundingClientRect();const x=(e.clientX-b.left)*W/b.width;show(Math.round((x-L)/((W-L-R)/(n-1||1))))};
-  hit.addEventListener('pointermove',pick);hit.addEventListener('pointerdown',pick);hit.addEventListener('pointerleave',hide);
-  hit.addEventListener('focus',()=>show(kj));hit.addEventListener('blur',hide);
+  const pk=e=>{const b=svg.getBoundingClientRect();show(Math.round(((e.clientX-b.left)*W/b.width-L)/((W-L-R)/(n-1||1))))};
+  hit.addEventListener('pointermove',pk);hit.addEventListener('pointerdown',pk);hit.addEventListener('pointerleave',hide);hit.addEventListener('focus',()=>show(kj));hit.addEventListener('blur',hide);
   hit.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')show(kj-1);if(e.key==='ArrowRight')show(kj+1)});
 }
-function legend(series){return h('div',{class:'legend'},series.map(s=>h('span',null,h('i',{class:s.dash?'d':null,style:'--c:'+s.color}),s.name)))}
-
-// ---------- KPIs e destaques ----------
-function renderTop(){
-  const c=x=>IT.filter(i=>i.c===x).length;
-  $('#kpis').replaceChildren(...[[nf(D.cdiY['12M'],2)+'%','CDI em 12 meses'],[nf(D.cdiY['2026'],2)+'%','CDI em 2026 (até 14/10)'],[c('High Grade'),'fundos high grade'],[c('High Yield'),'fundos high yield'],[IT.filter(i=>i.t==='ETF').length,'ETFs de renda fixa'],[c('Infra CDI')+c('Liquidez longa'),'outros para referência']].map(([v,k])=>h('div',{class:'kpi'},h('div',{class:'v',text:String(v)}),h('div',{class:'k',text:k}))));
-  const cols=[['hg','High Grade',i=>i.c==='High Grade','p-hg'],['hy','High Yield',i=>i.c==='High Yield','p-hy'],['et','ETFs pós-fixados',i=>/Selic|Crédito DI/.test(i.c),'p-et'],['in','Infra CDI',i=>i.c==='Infra CDI','p-in']];
-  $('#board').replaceChildren(...cols.map(([k,t,f,p])=>{const top=IT.filter(i=>f(i)&&i.nota!=null).sort((a,b)=>b.nota-a.nota).slice(0,5);
-    return h('div',{class:'col '+k},h('div',{class:'col-h'},h('span',{class:'pill '+p,text:t})),...top.map(i=>{const w=i.w36?['3 anos',i.w36]:['12 meses',i.w12];
-      return h('div',{class:'card'},h('div',{style:'display:flex;justify-content:space-between;gap:8px;align-items:flex-start'},nameLink(i),notaEl(i.nota)),
-        h('div',{class:'row'},h('span',null,w[0]+' ',h('b',{text:nf(pcdi(w[1]),0)+'% do CDI'})),h('span',null,'Resgate ',h('b',{text:'D+'+i.d}))),
-        h('div',{class:'row'},h('span',null,'Queda máx. ',h('b',{text:nf(i.dd,1)+'%'})),h('span',null,'Taxa ',h('b',{text:i.tx!=null?nf(i.tx,2)+'%':'–'}))),
-        i.fl.length?h('div',{class:'row'},h('span',{class:'warn',text:i.fl[0]})):null,
-        h('div',{class:'acts'},addBtn(i),h('button',{class:'btn sm',onclick:()=>openFicha(i.id)},'Ver ficha')))}))}));
-}
-
-// ---------- lista ----------
-const RETCOLS=[['a2026','2026',i=>i.a['2026'],1],['a2025','2025',i=>i.a['2025'],1],['a2024','2024',i=>i.a['2024'],1],['a2023','2023',i=>i.a['2023'],1],['a2022','2022',i=>i.a['2022'],0],['w12','12 meses',i=>i.w12,1],['w24','2 anos',i=>i.w24,0],['w36','3 anos',i=>i.w36,1]];
-const retVal=p=>p?(F.mode==='cdi'?pcdi(p):p[0]):null;
-function retCell(i,p,key){if(!p)return h('span',{class:'dim',text:'–'});const x=pcdi(p);const xp=key==='w12'&&i.s12==='XP';
-  return h('span',{class:x<90?'warn':(x>=110?'good':null),title:nf(p[0],2)+'% no período · CDI '+nf(p[1],2)+'% · '+nf(x,1)+'% do CDI'+(xp?' (12 meses da XP)':'')+(key==='a2026'?' · até 14/10':''),text:(F.mode==='cdi'?nf(x,0):nf(p[0],1))+'%'+(xp?'*':'')})}
-const COLS=[
-  {k:'n',l:'Ativo',cls:'l name',v:i=>i.n.toLowerCase(),r:i=>[nameLink(i),h('div',{class:'tags'},tags(i)),i.fl.length?h('div',{class:'fl',text:i.fl.join(' · ')}):null]},
-  {k:'add',l:'',cls:'l',r:i=>addBtn(i)},
-  {k:'nota',l:'Nota',v:i=>i.nota,r:i=>notaEl(i.nota)},
-  {k:'d',l:'Resgate',v:i=>i.d,r:i=>h('span',{title:i.liq,text:'D+'+i.d})},
-  ...RETCOLS.map(([k,l,g,basic])=>({k,l,basic,v:i=>retVal(g(i)),r:i=>retCell(i,g(i),k)})),
-  {k:'dd',l:'Queda máx.',v:i=>i.dd,r:i=>h('span',{class:i.dd<-1?'warn':null,text:nf(i.dd,2)+'%'})},
-  {k:'tx',l:'Taxa adm.',v:i=>i.tx,r:i=>h('span',{text:i.tx!=null?nf(i.tx,2)+'%':'–'})},
-  {k:'vol',l:'Oscilação',basic:0,v:i=>i.vol,r:i=>h('span',{text:i.vol==null?'–':nf(i.vol,2)+'%'})},
-  {k:'beat',l:'Meses no CDI',basic:0,v:i=>i.beat,r:i=>h('span',{text:i.beat==null?'–':i.beat+'%'})},
-  {k:'pl',l:'Patrimônio / giro',basic:0,v:i=>i.t==='ETF'?i.adv:i.pl,r:i=>h('span',{text:i.t==='ETF'?'giro R$ '+nf(i.adv,1)+' mi':(i.pl!=null?'R$ '+nf(i.pl,0)+' mi':'–')})},
-  {k:'min',l:'Mínimo',basic:0,v:i=>i.min||0,r:i=>h('span',{text:i.t==='ETF'?'1 cota':(i.min>=1000?'R$ '+nf(i.min/1000,i.min%1000?1:0)+' mil':'R$ '+nf(i.min,0))})},
-  {k:'risco',l:'Risco XP',basic:0,v:i=>i.risco,r:i=>h('span',{text:i.risco!=null?String(i.risco):'–'})},
-  {k:'ini',l:'Dados desde',basic:0,v:i=>i.ini,r:i=>h('span',{class:'dim',text:ml(i.ini.slice(0,4)+i.ini.slice(5,7))})},
-];
-const SORTS=[['nota','Nota (melhor primeiro)',-1],['w12','Retorno em 12 meses',-1],['w36','Retorno em 3 anos',-1],['a2026','Retorno em 2026',-1],['a2025','Retorno em 2025',-1],['dd','Menor queda',-1],['vol','Menor oscilação',1],['d','Resgate mais rápido',1],['tx','Menor taxa',1],['pl','Maior patrimônio',-1],['n','Nome (A a Z)',1]];
-$('#fSort').append(...SORTS.map(([k,l])=>h('option',{value:k,text:l})));
-function visCols(){return COLS.filter(c=>c.basic!==0||ST.cols)}
-function filtered(){const q=F.q.trim().toLowerCase();const cli=document.documentElement.dataset.modo==='cliente';
-  return IT.filter(i=>F.cats.has(catKey(i.c))&&(!F.max||cli||i.max)&&i.d<=F.liq&&(F.f12==null||(pcdi(i.w12)??-1e9)>=F.f12)&&(F.f36==null||(pcdi(i.w36)??-1e9)>=F.f36)&&(F.dd==null||i.dd>=-Math.abs(F.dd))&&(F.nota==null||(i.nota??-1)>=F.nota)&&(F.tx==null||(i.tx!=null&&i.tx<=F.tx))&&(F.pl==null||((i.t==='ETF'?null:i.pl)??-1)>=F.pl)&&(F.hist===0||(F.hist===12?(i.w12&&i.s12!=='XP'):i.w36))&&(!q||(i.n+' '+(i.gest||'')+' '+(i.tk||'')+' '+i.c).toLowerCase().includes(q)));}
-function sorted(list){const col=COLS.find(c=>c.k===F.sort);return list.slice().sort((a,b)=>{const x=col.v(a),y=col.v(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (x>y?1:x<y?-1:0)*F.dir})}
-function dirLabel(){const s=F.sort;const asc=F.dir>0;if(s==='n')return asc?'A → Z':'Z → A';return asc?'↑ Crescente':'↓ Decrescente'}
-function renderList(){
-  $('#fSort').value=SORTS.some(s=>s[0]===F.sort)?F.sort:'';$('#fDir').textContent=dirLabel();$('#fCols').textContent=ST.cols?'Mostrar menos colunas':'Mostrar mais colunas';
-  const cols=visCols();
-  $('#tbl thead').replaceChildren(h('tr',null,cols.map(c=>{const th=h('th',{class:c.cls&&c.cls.includes('l')?('l'+(c.k==='n'?' name':'')):null,scope:'col'});
-    if(c.v)th.append(h('button',{title:'Clique para ordenar',onclick:()=>{if(F.sort===c.k)F.dir*=-1;else{F.sort=c.k;F.dir=['n','d','tx','vol','min','risco'].includes(c.k)?1:-1}renderList()}},c.l,h('span',{class:'ar',text:F.sort===c.k?(F.dir<0?'▼':'▲'):'↕'})));else th.textContent=c.l;return th})));
-  const rows=sorted(filtered());
-  const cel=isCel();$('#tblWrap').hidden=cel;$('#lcards').hidden=!cel;$('#count').textContent=rows.length+' ativos';
-  if(cel){$('#lcards').replaceChildren(...rows.map(i=>{const w=i.w36?['3 anos',i.w36]:['12 meses',i.w12];return h('div',{class:'lc'},h('div',{style:'display:flex;justify-content:space-between;gap:8px;align-items:flex-start'},nameLink(i),notaEl(i.nota)),h('div',{class:'tags',style:'display:flex;gap:4px;flex-wrap:wrap'},tags(i)),
-    h('div',{class:'row'},h('span',null,'12 meses ',h('b',{text:i.w12?(F.mode==='cdi'?nf(pcdi(i.w12),0)+'% do CDI':nf(i.w12[0],1)+'%'):'–'})),h('span',null,'Resgate ',h('b',{text:'D+'+i.d}))),
-    h('div',{class:'row'},h('span',null,'3 anos ',h('b',{text:i.w36?(F.mode==='cdi'?nf(pcdi(i.w36),0)+'% do CDI':nf(i.w36[0],1)+'%'):'–'})),h('span',null,'Queda máx. ',h('b',{text:nf(i.dd,1)+'%'}))),
-    i.fl.length?h('div',{class:'warn',style:'font-size:12.5px',text:i.fl[0]}):null,h('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},addBtn(i),h('button',{class:'btn sm',onclick:()=>openFicha(i.id)},'Ver ficha')))}));return}
-  $('#tbl tbody').replaceChildren(...rows.map(i=>h('tr',null,cols.map(c=>h('td',{class:c.cls||null},c.r(i))))));
-  $('#count').textContent=rows.length+' ativos';
-}
-$$('.chip[data-cat]').forEach(b=>b.addEventListener('click',()=>{const c=b.dataset.cat;F.cats.has(c)?F.cats.delete(c):F.cats.add(c);b.setAttribute('aria-pressed',String(F.cats.has(c)));renderList()}));
-$('#fq').addEventListener('input',e=>{F.q=e.target.value;renderList()});
-$('#fSort').addEventListener('change',e=>{const s=SORTS.find(x=>x[0]===e.target.value);F.sort=s[0];F.dir=s[2];renderList()});
-$('#fDir').addEventListener('click',()=>{F.dir*=-1;renderList()});
-$('#fMode').addEventListener('change',e=>{F.mode=e.target.value;renderList()});
-$('#fCols').addEventListener('click',()=>{ST.cols=!ST.cols;save();renderList()});
-const num=v=>{if(v===''||v==null)return null;const n=parseFloat(String(v).replace(',','.'));return isFinite(n)?n:null};
-[['#f12','f12'],['#f36','f36'],['#fDD','dd'],['#fNota','nota'],['#fTx','tx'],['#fPL','pl']].forEach(([s,k])=>$(s).addEventListener('input',e=>{F[k]=num(e.target.value);renderList()}));
-$('#fLiq').addEventListener('change',e=>{F.liq=+e.target.value;renderList()});
-$('#fHist').addEventListener('change',e=>{F.hist=+e.target.value;renderList()});
-$('#fMax').addEventListener('change',e=>{F.max=e.target.checked;renderList()});
-$('#fClear').addEventListener('click',()=>{['#f12','#f36','#fDD','#fNota','#fTx','#fPL'].forEach(s=>$(s).value='');$('#fLiq').value='999';$('#fHist').value='0';$('#fMax').checked=false;Object.assign(F,{f12:null,f36:null,dd:null,nota:null,tx:null,pl:null,liq:999,hist:0,max:false});renderList()});
-
-// ---------- cenário ----------
-const ldColors=()=>[css('--s4'),css('--s1'),css('--s2'),css('--s3')];
+const legend=series=>h('div',{class:'legend'},series.map(s=>h('span',null,h('i',{class:s.dash?'d':null,style:'--c:'+s.color}),s.name)));
 const LADL=['Em até 1 dia','Em até 15 dias','Em até 35 dias','Mais de 35 dias'];
-function ladderEl(lad,total){const cs=ldColors();return h('div',{style:'display:flex;flex-direction:column;gap:8px'},
-  h('div',{class:'ladder'},lad.map((v,j)=>v>0?h('i',{style:'width:'+(v/total*100)+'%;background:'+cs[j],title:LADL[j]+': '+brl(v)}):null)),
+const ladColors=()=>[css('--s4'),css('--s1'),css('--s2'),css('--warn')];
+function ladderEl(lad,total){const cs=ladColors();return h('div',{style:'display:flex;flex-direction:column;gap:10px'},h('div',{class:'ladder'},lad.map((v,j)=>v>0?h('i',{style:'width:'+(v/total*100)+'%;background:'+cs[j]}):null)),
   h('div',{class:'lrows'},lad.flatMap((v,j)=>[h('span',{class:'sw',style:'background:'+cs[j]}),h('span',{text:LADL[j]}),h('b',{text:brl(v)+' ('+nf(v/total*100,0)+'%)'})])))}
-function renderScenario(){
-  const n=ST.cur,sc=ST.sc[n];
-  $('#scTabs').replaceChildren(...ST.sc.map((s,j)=>h('button',{class:'btn'+(j===n?' pri':''),onclick:()=>{ST.cur=j;save();refresh()}},'Cenário '+(j+1)+(s.pos.length?' · '+s.pos.length+' ativos':' · vazio'))));
-  const L=$('#bLeft'),Rt=$('#bRight');L.replaceChildren();Rt.replaceChildren();
-  // passo 1 valor
-  const val=h('input',{type:'text',id:'bVal',inputmode:'numeric',value:sc.val.toLocaleString('pt-BR'),'aria-label':'Valor aplicado em reais',style:'flex:1;min-width:130px'});
-  val.addEventListener('change',()=>{const v=parseFloat(val.value.replace(/[^\d,]/g,'').replace(',','.'));if(v>0){sc.val=v;save();refresh()}else val.value=sc.val.toLocaleString('pt-BR')});
-  L.append(h('h3',null,h('span',{class:'num',text:'1'}),'Quanto vai aplicar'),h('div',{style:'display:flex;gap:6px;flex-wrap:wrap'},h('span',{class:'mut',style:'align-self:center',text:'R$'}),val,...[1e6,5e6,10e6].map(v=>h('button',{class:'btn sm'+(sc.val===v?' on':''),onclick:()=>{sc.val=v;save();refresh()}},nf(v/1e6,0)+' mi'))));
-  // passo 2 ativos
-  const add=h('input',{type:'search',list:'dl',placeholder:'Digite o nome ou o código e escolha',id:'bAdd','aria-label':'Adicionar ativo'});
-  add.addEventListener('change',()=>{const i=IT.find(x=>x.n===add.value);if(i)addSc(i.id);add.value=''});
-  L.append(h('h3',null,h('span',{class:'num',text:'2'}),'Quais ativos e quanto em cada'),add);
-  const wsum=sc.pos.reduce((s,p)=>s+(+p.w||0),0);
-  if(!sc.pos.length){L.append(h('div',{class:'empty'},h('span',{text:'Nenhum ativo neste cenário ainda. Busque acima, use "+ Cenário" na Lista completa, ou copie outro cenário.'}),h('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},ST.sc.map((s,j)=>j!==n&&s.pos.length?h('button',{class:'btn sm',onclick:()=>{sc.pos=s.pos.map(p=>({...p}));sc.val=s.val;save();refresh()}},'Copiar do Cenário '+(j+1)):null))))}
-  sc.pos.forEach(p=>{const i=BYID[p.id];
-    const inp=h('input',{type:'number',min:'0',max:'100',step:'1',value:String(p.w),'aria-label':'Peso de '+i.n});
-    inp.addEventListener('change',()=>{p.w=Math.max(0,+String(inp.value).replace(',','.')||0);save();refresh()});
-    const bump=d=>()=>{p.w=Math.max(0,Math.round((+p.w+d)*100)/100);save();refresh()};
-    L.append(h('div',{class:'pos'},h('div',{style:'min-width:0'},nameLink(i),h('div',{class:'tags',style:'display:flex;gap:4px;margin-top:3px;flex-wrap:wrap'},tags(i))),
-      h('div',{class:'ctrl'},h('button',{class:'btn sm',onclick:bump(-5),'aria-label':'Diminuir 5 pontos'},'−'),inp,h('span',{class:'mut',text:'%'}),h('button',{class:'btn sm',onclick:bump(5),'aria-label':'Aumentar 5 pontos'},'+')),
-      h('div',{class:'rs'},h('span',{text:brl(sc.val*(+p.w||0)/(wsum||1))+' · resgate D+'+i.d}),h('button',{class:'rm',onclick:()=>remSc(p.id)},'tirar'))))});
-  if(sc.pos.length){L.append(h('div',{style:'display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap'},h('span',{class:Math.abs(wsum-100)>0.01?'warn':'mut',text:'Soma: '+nf(wsum,1)+'%'+(Math.abs(wsum-100)>0.01?' (vou dividir proporcionalmente)':'')}),h('div',{style:'display:flex;gap:6px'},h('button',{class:'btn sm',onclick:()=>{eq(sc);save();refresh()}},'Dividir igual'),h('button',{class:'btn sm',onclick:()=>{sc.pos=[];save();refresh()}},'Limpar'))))}
-  const R=sim(sc);
-  if(R){L.append(h('h3',null,h('span',{class:'num',text:'3'}),'Quanto dá para resgatar rápido'),ladderEl(R.lad,sc.val));
-    L.append(h('div',{class:'note',text:'Período da simulação: início de '+ml(R.start)+' até 14/10/2026. Quem limita o início: '+R.limiter.join(', ')+'.'+(R.gaps.length?' Mês sem cota contado como zero em: '+R.gaps.join(', ')+'.':'')}))}
-  // resultado
-  if(!R){Rt.append(h('div',{class:'empty',text:'O resultado aparece aqui quando o cenário tiver ao menos um ativo.'}));return}
-  const liq=ST.liq==='liquido';
-  const seg=h('div',{class:'seg',role:'group','aria-label':'Mostrar antes ou depois do IR'},[['bruto','Antes do IR'],['liquido','Depois do IR']].map(([k,l])=>h('button',{'aria-pressed':String(ST.liq===k),onclick:()=>{ST.liq=k;save();refresh()}},l)));
-  const fin=liq?R.N:R.G, cdi=liq?R.CN:R.C, ret=fin/R.val-1, cret=cdi/R.val-1;
-  Rt.append(h('div',{style:'display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center'},h('h3',{style:'margin:0',text:'Resultado do Cenário '+(n+1)}),seg));
-  Rt.append(h('p',{class:'say'},brl(R.val)+' aplicados no início de '+ml(R.start)+' virariam ',h('b',{text:brl(fin)}),' em 14/10/2026 '+(liq?'depois do IR':'antes do IR')+'. No mesmo período, '+(liq?'um fundo que rendesse 100% do CDI, já descontado o IR, daria ':'o CDI daria ')+brl(cdi)+'. ',h('b',{class:fin>=cdi?'good':'warn',text:(fin>=cdi?'Diferença a favor: ':'Diferença contra: ')+brl(Math.abs(fin-cdi))}),'.'));
-  const K=[[nf(ret*100,2)+'%',(liq?'rendimento depois do IR':'rendimento antes do IR')],[nf(ret/cret*100,1)+'%',liq?'do CDI líquido':'do CDI'],[R.beat+' de '+R.nfull,'meses no CDI ou acima'],[R.worst?ml(R.worst.k):'–',R.worst?'pior mês: '+nf(R.worst.r*100,2)+'% (CDI '+nf(R.worst.c*100,2)+'%)':'pior mês'],[brl(R.G-R.N),'custo do IR (come-cotas + resgate)'],[R.vol==null?'–':nf(R.vol,2)+'%','oscilação no ano'],[brl(R.G),'saldo antes do IR'],[brl(R.N),'saldo depois do IR']];
-  Rt.append(h('div',{class:'res-k'},K.map(([v,k])=>h('div',{class:'kpi'},h('div',{class:'v',text:v}),h('div',{class:'k',text:k})))));
-  const s1=css('--s1'),s3=css('--s3'),cg=css('--cdi');
-  const series=[{name:'Antes do IR',color:s1,pts:R.pts.map(p=>({v:p.G}))},{name:'Depois do IR',color:s3,pts:R.pts.map(p=>({v:p.N}))},{name:liq?'CDI depois do IR':'CDI',color:cg,dash:1,pts:R.pts.map(p=>({v:liq?p.CN:p.C}))}];
-  const box=h('div',{class:'chart'});Rt.append(legend(series),box);
-  lineChart(box,series,{label:'Evolução do patrimônio do cenário contra o CDI',fy:v=>'R$ '+nf(v/1e6,2)+' mi',fx:j=>j===0?'início':ml(R.pts[j].k),tx:j=>j===0?'Início de '+ml(R.start):'Fim de '+ml(R.pts[j].k)+(R.pts[j].k==='202610'?' (até dia 14)':''),fv:v=>brl(v)});
-  Rt.append(h('div',{class:'note',text:'Depois do IR = valor que cairia na conta se resgatasse naquele mês, com come-cotas e IR na fonte. Para empresa do lucro real ou presumido, esse IR é adiantamento do imposto da empresa (veja Como ler).'}));
-  // tabela mensal
-  const names=R.P.map(p=>short(p.i));
-  const t=h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:'Mês'}),h('th',{text:'Rendeu'}),h('th',{text:'CDI'}),h('th',{text:'% do CDI'}),h('th',{text:'Ganho no mês'}),h('th',{text:'Saldo antes do IR'}),h('th',{text:'Saldo depois do IR'}),names.map((nm,j)=>h('th',{title:R.P[j].i.n,text:nm})))),
-    h('tbody',null,R.rows.slice().reverse().map(r=>{const x=r.c>0?r.r/r.c*100:null;return h('tr',null,h('td',{class:'l',text:ml(r.k)+(r.k==='202610'?' (até 14)':'')}),h('td',{text:nf(r.r*100,2)+'%'}),h('td',{class:'dim',text:nf(r.c*100,2)+'%'}),h('td',{class:x<90?'warn':(x>=110?'good':null),text:nf(x,0)+'%'}),h('td',{text:brl(r.gain)}),h('td',{text:brl(r.G)}),h('td',{text:brl(r.N)}),r.each.map(e=>h('td',{class:'dim',text:nf(e*100,2)+'%'})))})));
-  Rt.append(h('h3',{style:'margin-top:6px',text:'Mês a mês'}),h('div',{class:'tbl-wrap',style:'max-height:520px'},t));
+
+const fmtK=v=>(v<0?'-':'')+(Math.abs(v)>=1e6?'R$ '+nf(Math.abs(v)/1e6,1)+' mi':'R$ '+nf(Math.abs(v)/1e3,0)+' mil');
+function histChart(list,key,def){
+  key=key||'cv';const mode=(ST[key]||def||'acc')==='ex'?'ex':'acc',R0=list[0].R;
+  const seg=h('div',{class:'seg noprint',role:'group','aria-label':'Tipo de gráfico'},[['acc','Rendimento'],['ex','Ganho acima do CDI']].map(([k,l])=>h('button',{'aria-pressed':String(mode===k),onclick:()=>{ST[key]=k;save();renderTab()}},l)));
+  const series=mode==='acc'?[...list.map(x=>({name:x.name,color:x.color,pts:x.R.pts.map(p=>({v:(p.G/x.R.val-1)*100}))})),{name:'CDI',color:css('--cdi'),dash:1,pts:R0.pts.map(p=>({v:(p.C/R0.val-1)*100}))}]
+    :[...list.map(x=>({name:x.name,color:x.color,pts:x.R.pts.map(p=>({v:p.G-p.C}))})),{name:'CDI (linha do zero)',color:css('--cdi'),dash:1,pts:R0.pts.map(()=>({v:0}))}];
+  const cb=h('div',{class:'chart'});
+  const el=h('div',{style:'display:flex;flex-direction:column;gap:10px'},mode==='ex'?h('div',{class:'note',text:'Quanto se ganhou a mais, em reais, do que deixando o mesmo valor 100% no CDI. Acima de zero, ganhou do CDI.'}):null,legend(series),cb);
+  const tx=j=>j===0?'Início de '+ml(R0.start):'Fim de '+ml(R0.pts[j].k)+(R0.pts[j].k==='202610'?' (até dia 14)':'');
+  return {seg,el,draw:()=>lineChart(cb,series,mode==='acc'?{label:'Rendimento acumulado contra o CDI',fy:v=>nf(v,0)+'%',fx:j=>j===0?'início':ml(R0.pts[j].k),tx,fv:v=>nf(v,2)+'%'}:{left:76,label:'Ganho acumulado acima do CDI em reais',fy:fmtK,fx:j=>j===0?'início':ml(R0.pts[j].k),tx,fv:brl})};
 }
 
-// ---------- comparar cenários ----------
-function renderCompare(){
-  const box=$('#cmp');box.replaceChildren();
-  const full=ST.sc.map((s,j)=>({s,j})).filter(x=>x.s.pos.length&&sim(x.s));
-  if(full.length<1){box.append(h('div',{class:'empty',text:'Monte pelo menos um cenário na aba Montar cenário.'}));return}
-  const start=full.map(x=>sim(x.s).lim).reduce((a,b)=>a>b?a:b);
-  const Rs=full.map(x=>({j:x.j,R:sim(x.s,start)}));
-  if(full.length<2)box.append(h('p',{class:'note',text:'Só o Cenário '+(full[0].j+1)+' está preenchido. Monte o 2 e o 3 para comparar.'}));
-  const cols=[css('--s1'),css('--s2'),css('--s3')];
-  const series=[...Rs.map(({j,R})=>({name:'Cenário '+(j+1),color:cols[j],pts:R.pts.map(p=>({v:(p.G/R.val-1)*100}))})),{name:'CDI',color:css('--cdi'),dash:1,pts:Rs[0].R.pts.map(p=>({v:(p.C/Rs[0].R.val-1)*100}))}];
-  const rows=[
-    ['Ativos',R=>R.P.map(p=>short(p.i)+' '+nf(p.w/R.wsum*100,0)+'%').join(' · ')],
-    ['Valor aplicado',R=>brl(R.val)],
-    ['Período',R=>'início de '+ml(R.start)+' a 14/10/26'],
-    ['Saldo antes do IR',R=>brl(R.G)],
-    ['Rendimento antes do IR',R=>nf((R.G/R.val-1)*100,2)+'% ('+nf((R.G/R.val-1)/(R.C/R.val-1)*100,1)+'% do CDI)'],
-    ['Saldo depois do IR',R=>brl(R.N)],
-    ['Rendimento depois do IR',R=>nf((R.N/R.val-1)*100,2)+'% ('+nf((R.N/R.val-1)/(R.CN/R.val-1)*100,1)+'% do CDI líquido)'],
-    ['Diferença para o CDI (antes do IR)',R=>brl(R.G-R.C)],
-    ['Meses no CDI ou acima',R=>R.beat+' de '+R.nfull],
-    ['Pior mês',R=>R.worst?ml(R.worst.k)+': '+nf(R.worst.r*100,2)+'% (CDI '+nf(R.worst.c*100,2)+'%)':'–'],
-    ['Oscilação no ano',R=>R.vol==null?'–':nf(R.vol,2)+'%'],
-    ...LADL.map((l,q)=>['Resgate '+l.toLowerCase(),R=>nf(R.lad[q]/R.val*100,0)+'% ('+brl(R.lad[q])+')'])];
-  box.append(h('div',{class:'tbl-wrap',style:'max-height:none'},h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:''}),Rs.map(({j})=>h('th',{class:'l',style:'color:'+cols[j],text:'Cenário '+(j+1)})))),h('tbody',null,rows.map(([l,f])=>h('tr',null,h('td',{class:'l mut',text:l}),Rs.map(({R})=>h('td',{class:'l',style:'white-space:normal;min-width:180px',text:f(R)}))))))));
-  const cb=h('div',{class:'chart'});box.append(h('h3',{style:'margin-top:8px',text:'Quanto cada cenário rendeu no período (antes do IR)'}),legend(series),cb);
-  lineChart(cb,series,{label:'Rendimento acumulado dos cenários',fy:v=>nf(v,0)+'%',fx:j=>j===0?'início':ml(Rs[0].R.pts[j].k),tx:j=>j===0?'Início':'Fim de '+ml(Rs[0].R.pts[j].k),fv:v=>nf(v,2)+'%'});
+// ---------- simulador ----------
+const valIn=$('#val');
+valIn.addEventListener('change',()=>{const v=parseFloat(valIn.value.replace(/[^\d,]/g,'').replace(',','.'));if(v>0){ST.val=v;save();renderSim()}else valIn.value=ST.val.toLocaleString('pt-BR')});
+$('#eq').addEventListener('click',()=>{eq();save();renderSim()});
+$('#clr').addEventListener('click',()=>{ST.pos=[];ST.from=null;save();renderSim()});
+$('#all').addEventListener('click',()=>openList());
+const qIn=$('#q'),dd=$('#dd');
+function renderDD(){const q=qIn.value.trim().toLowerCase();if(q.length<2){dd.hidden=true;return}
+  const m=IT.filter(i=>(i.n+' '+(i.tk||'')+' '+(i.gest||'')).toLowerCase().includes(q)).sort((a,b)=>(b.nota??-1)-(a.nota??-1)).slice(0,10);
+  dd.replaceChildren(...(m.length?m.map(i=>h('button',{onclick:()=>{addAsset(i.id);qIn.value='';dd.hidden=true}},h('span',null,i.n+' ',h('span',{class:'pill '+pillOf(i.c),text:catLabel(i.c)})),h('span',{class:'mut',text:'D+'+i.d+(i.w12?' · '+nf(pcdi(i.w12),0)+'% CDI 12m':'')}))):[h('div',{class:'note',style:'padding:10px 12px',text:'Nada encontrado. Tente outro nome ou use "Ver todos os ativos".'})]));dd.hidden=false}
+qIn.addEventListener('input',renderDD);qIn.addEventListener('focus',renderDD);
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))dd.hidden=true});
+
+function renderSim(){
+  valIn.value=ST.val.toLocaleString('pt-BR');
+  $('#valBtns').replaceChildren(...[5e6,10e6,15e6].map(v=>h('button',{class:'btn sm'+(ST.val===v?' on':''),onclick:()=>{ST.val=v;save();renderSim()}},nf(v/1e6,0)+' mi')));
+  $('#quick').replaceChildren(...SUG.map((s,j)=>h('button',{class:'btn sm'+(ST.from===s.n?' on':''),title:s.t,onclick:()=>{loadSug(j);renderSim();toast(s.n+' carregada')}},s.n)));
+  // tabela de alocação
+  const W=wsum(),disp=Math.round((100-W)*100)/100;
+  const head=h('tr',null,h('th',{class:'l',text:'Ativo'}),h('th',{class:'l hide-cel',text:'Tipo'}),h('th',{class:'hide-cel',text:'Resgate'}),h('th',null,h('span',{class:'only-desk',text:'% de alocação'}),h('span',{class:'only-cel',text:'%'})),h('th',{class:'hide-cel',text:'Valor'}),h('th',{class:'noprint hide-cel',text:''}));
+  const body=ST.pos.map(p=>{const i=BYID[p.id];const inp=h('input',{type:'number',min:'0',max:'100',step:'1',value:String(p.w),'aria-label':'Percentual de '+i.n});
+    inp.addEventListener('change',()=>{p.w=Math.max(0,+String(inp.value).replace(',','.')||0);ST.from=null;save();renderSim()});
+    return h('tr',null,h('td',{class:'l name'},h('button',{class:'lnk',onclick:()=>openFicha(i.id),text:i.n}),h('div',{class:'mut',style:'font-size:13px'},brl(ST.val*(+p.w||0)/100),h('span',{class:'only-cel',text:' · resgate D+'+i.d+' '}),h('button',{class:'rm only-cel noprint',onclick:()=>remAsset(p.id)},'tirar'))),h('td',{class:'l hide-cel'},h('span',{class:'pill '+pillOf(i.c),text:catLabel(i.c)})),h('td',{class:'hide-cel',text:'D+'+i.d}),h('td',null,inp,' %'),h('td',{class:'hide-cel',text:brl(ST.val*(+p.w||0)/100)}),h('td',{class:'noprint hide-cel'},h('button',{class:'rm',onclick:()=>remAsset(p.id)},'tirar')))});
+  const foot=[h('tr',{class:'disp'},h('td',{class:'l',text:'Disponível para alocação'}),h('td',{class:'hide-cel'}),h('td',{class:'hide-cel'}),h('td',{class:Math.abs(disp)>0.01?'warn':null,text:nf(disp,2)+' %'}),h('td',{class:'hide-cel',text:brl(ST.val*disp/100)}),h('td',{class:'noprint hide-cel'})),
+    h('tr',{class:'tot'},h('td',{class:'l',text:'Alocação total'}),h('td',{class:'hide-cel'}),h('td',{class:'hide-cel'}),h('td',{text:nf(W,2)+' %'}),h('td',{class:'hide-cel',text:brl(ST.val*W/100)}),h('td',{class:'noprint hide-cel'}))];
+  $('#alloc').replaceChildren(h('thead',null,head),h('tbody',null,ST.pos.length?body:h('tr',null,h('td',{class:'l mut',colspan:'6',text:'Nenhum ativo ainda. Busque acima ou comece por uma sugestão.'})),foot));
+  renderRes();
+}
+function renderRes(){
+  const box=$('#res');box.replaceChildren();const W=wsum();
+  if(!ST.pos.length)return;
+  if(Math.abs(W-100)>0.01){box.append(h('div',{class:'card'},h('div',{class:'empty',text:'Complete 100% de alocação para ver o resultado (faltam '+nf(100-W,2)+' %). Use "Dividir igual" se quiser repartir automático.'})));return}
+  const R=sim(ST.pos,ST.val);if(!R)return;
+  const ret=(R.G/R.val-1)*100,cret=(R.C/R.val-1)*100,nmes=R.rows.length;
+  const w12=win(R,12);
+  // 3. resumo
+  const top=h('div',{class:'card'},h('div',{class:'card-h'},h('h2',null,h('span',{class:'num',text:'3'}),'Resultado'),h('div',{class:'row noprint'},h('button',{class:'btn sm',onclick:()=>{setTab('cmp')}},'Comparar com as sugestões e o FIDC'),inIframe?null:h('button',{class:'btn sm',onclick:()=>print()},'Imprimir ou salvar PDF'))),
+    h('p',{class:'say'},brl(R.val)+' aplicados no início de '+ml(R.start)+' virariam ',h('b',{text:brl(R.G)}),' em 14/10/2026, ou ',h('b',{text:nf(ret,2)+'% ('+nf(ret/cret*100,0)+'% do CDI)'}),'. O CDI daria '+brl(R.C)+'.'),
+    h('div',{class:'kpis'},[[nf(w12?w12.r:null,2)+'%','rendeu nos últimos 12 meses'+(w12?' ('+nf(w12.r/w12.c*100,0)+'% do CDI)':'')],[nf(R.lad[0]/R.val*100,0)+'%','resgatável em até 1 dia (o mais longo: D+'+R.maxd+')'],[R.above+' de '+R.full.length,'meses no CDI ou acima'],[R.worst?nf(R.worst.r*100,2)+'%':'–','pior mês'+(R.worst?' ('+ml(R.worst.k)+', CDI '+nf(R.worst.c*100,2)+'%)':'')]].map(([v,k])=>h('div',{class:'kpi'},h('div',{class:'v',text:v}),h('div',{class:'k',text:k})))),
+    R.limiter.length&&R.start>'202202'?h('div',{class:'note',text:'O histórico começa em '+ml(R.start)+' porque '+R.limiter.map(short).join(', ')+' começou nessa época.'}):null);
+  box.append(top);
+  // histórico
+  const hc=histChart([{name:'Carteira',color:css('--s1'),R}]);
+  const per=[['No mês (out/26 até dia 14)',(()=>{const r=R.rows[R.rows.length-1];return r.k==='202610'?{r:r.r*100,c:r.c*100}:null})()],['No ano (2026 até 14/10)',span(R,'202601','202610')],['3 meses',win(R,3)],['6 meses',win(R,6)],['12 meses',win(R,12)],['24 meses',win(R,24)],['36 meses',win(R,36)],['Desde '+ml(R.start),{r:ret,c:cret}]];
+  const ptab=h('table',{class:'ptab'},h('thead',null,h('tr',null,h('th',{class:'l',text:'Período'}),h('th',{text:'Carteira'}),h('th',{class:'hide-cel',text:'CDI'}),h('th',{text:'% do CDI'}),h('th',{text:'Evolução'}))),
+    h('tbody',null,per.map(([l,x])=>h('tr',null,h('td',{class:'l'},l,x&&x.from?h('span',{class:'mut',style:'font-size:13px',text:' ('+ml(x.from)+' a '+ml(x.to)+')'}):null),h('td',{text:x?nf(x.r,2)+'%':'–'}),h('td',{class:'mut hide-cel',text:x?nf(x.c,2)+'%':'–'}),h('td',{class:x&&x.c>0&&x.r/x.c<.95?'warn':null,text:x&&x.c>0?nf(x.r/x.c*100,1)+'%':'–'}),h('td',{text:x?brl(R.val*(1+x.r/100)):'–'})))));
+  box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',{text:'Histórico de rentabilidade'}),hc.seg),hc.el,h('div',{class:'tw'},ptab)));
+  hc.draw();
+  // mensal
+  const years=[...new Set(R.rows.map(r=>r.k.slice(0,4)))];const byK=Object.fromEntries(R.rows.map(r=>[r.k,r]));
+  const mh=h('tr',null,h('th',{class:'l',text:'Mês'}),years.flatMap(y=>[h('th',{text:y}),h('th',{text:'% CDI'})]));
+  const mrows=MESL.map((m,mi)=>h('tr',null,h('td',{class:'l',text:m}),years.flatMap(y=>{const r=byK[y+String(mi+1).padStart(2,'0')];if(!r)return [h('td',{class:'n',text:'–'}),h('td',{class:'n',text:'–'})];const x=r.c>0?r.r/r.c*100:null;return [h('td',{text:nf(r.r*100,2)+'%'}),h('td',{class:x<100?'lo':null,text:nf(x,0)+'%'})]})));
+  const yrow=h('tr',{style:'font-weight:700'},h('td',{class:'l',text:'No ano'}),years.flatMap(y=>{const s=span(R,y+'01',y+'12');return [h('td',{text:s?nf(s.r,2)+'%':'–'}),h('td',{text:s&&s.c>0?nf(s.r/s.c*100,0)+'%':'–'})]}));
+  box.append(h('div',{class:'card'},h('h2',{text:'Rentabilidades mensais'}),h('div',{class:'note',text:'Em vermelho, os meses abaixo do CDI. Outubro de 2026 vai até o dia 14.'}),h('div',{class:'tw'},h('table',{class:'mgrid'},h('thead',null,mh),h('tbody',null,mrows,yrow)))));
+  // liquidez + constância
+  const cons=h('div',{class:'stats'},[[R.above+' meses','no CDI ou acima ('+nf(R.above/R.full.length*100,0)+'%)'],[R.below+' meses','abaixo do CDI'],[R.best?nf(R.best.r*100,2)+'% em '+ml(R.best.k):'–','melhor mês'],[R.worst?nf(R.worst.r*100,2)+'% em '+ml(R.worst.k):'–','pior mês (CDI '+(R.worst?nf(R.worst.c*100,2):'–')+'%)'],[R.vol==null?'–':nf(R.vol,2)+'%','oscilação no ano'],[nf(R.mdd*100,2)+'%','maior queda']].map(([v,k])=>h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:18px',text:v}),h('div',{class:'k',text:k}))));
+  box.append(h('div',{class:'grid2'},h('div',{class:'card'},h('h2',{text:'Liquidez da carteira'}),ladderEl(R.lad,R.val)),h('div',{class:'card'},h('h2',{text:'Constância'}),cons,R.worst&&R.worst.k==='202412'?h('div',{class:'note',text:'Dezembro de 2024 foi o mês do estresse fiscal: até o Tesouro Selic ficou abaixo do CDI e se recuperou no mês seguinte.'}):null)));
+  // detalhe dos ativos
+  const dh=h('tr',null,h('th',{class:'l',text:'Ativo'}),h('th',{text:'%'}),h('th',{text:'Resgate'}),h('th',{text:'2026'}),h('th',{text:'12 meses'}),h('th',{text:'24 meses'}),h('th',{text:'36 meses'}),h('th',{text:'Taxa adm.'}),h('th',{text:'Nota'}));
+  const cell=p=>p?h('td',null,nf(p[0],2)+'%',h('div',{class:'mut',style:'font-size:12.5px',text:nf(pcdi(p),0)+'% CDI'})):h('td',{class:'dim',text:'–'});
+  const drows=R.P.map(p=>h('tr',null,h('td',{class:'l',style:'white-space:normal;min-width:200px'},h('button',{class:'lnk',onclick:()=>openFicha(p.i.id),text:p.i.n})),h('td',{text:nf(p.w/R.W*100,0)+'%'}),h('td',{text:'D+'+p.i.d}),cell(p.i.a['2026']),cell(p.i.w12),cell(p.i.w24),cell(p.i.w36),h('td',{text:p.i.tx!=null?nf(p.i.tx,2)+'%':'–'}),h('td',null,h('span',{class:'nota',text:p.i.nota==null?'–':nf(p.i.nota,1)}))));
+  const pc=p=>p?nf(p[0],2)+'% ('+nf(pcdi(p),0)+'% CDI)':'–';
+  const dcards=h('div',{class:'only-cel'},h('div',{class:'mc'},R.P.map(p=>h('div',{class:'lc'},h('div',{class:'r'},h('button',{class:'lnk',style:'color:var(--fg)',onclick:()=>openFicha(p.i.id),text:p.i.n}),h('span',{class:'nota',text:p.i.nota==null?'–':nf(p.i.nota,1)})),
+    h('div',{class:'r'},h('span',null,'Peso ',h('b',{text:nf(p.w/R.W*100,0)+'%'})),h('span',null,'Resgate ',h('b',{text:'D+'+p.i.d})),h('span',null,'Taxa ',h('b',{text:p.i.tx!=null?nf(p.i.tx,2)+'%':'–'}))),
+    h('div',{class:'r'},h('span',null,'12 meses'),h('b',{text:pc(p.i.w12)})),h('div',{class:'r'},h('span',null,'36 meses'),h('b',{text:pc(p.i.w36)}))))));
+  box.append(h('div',{class:'card'},h('h2',{text:'Detalhe dos ativos'}),h('div',{class:'tw only-desk'},h('table',null,h('thead',null,dh),h('tbody',null,drows))),dcards));
+  // o que a XP não mostra
+  const fidcGain=w12?ST.val*fidcEq(w12)/100:null, myGain=w12?ST.val*w12.r/100:null;
+  const c23=R.start<='202301'?span(R,'202301','202304'):null;
+  const ex=h('ul',null,
+    h('li',null,h('b',{text:'Contra o FIDC: '}),myGain!=null?('em 12 meses esta carteira renderia '+brl(myGain)+'. A mediana dos FIDCs da XP ('+nf(FIDC_PC*100,0)+'% do CDI) renderia cerca de '+brl(fidcGain)+(myGain<fidcGain?' ('+brl(fidcGain-myGain)+' a mais), mas com resgate de 30 a 360 dias e um deles perdeu '+nf(-FIDC_MIN,1)+'% no período.':', e ainda com resgate de 30 a 360 dias.')):'precisa de 12 meses de histórico.'),
+    h('li',null,h('b',{text:'Na crise de crédito de 2023 (jan a abr): '}),c23?('a carteira rendeu '+nf(c23.r,2)+'%, ou '+nf(c23.r/c23.c*100,0)+'% do CDI.'):'algum ativo ainda não existia, então não dá para testar.'),
+    h('li',null,h('b',{text:'Depois do IR na fonte: '}),brl(R.N)+' (o CDI num fundo comum daria '+brl(R.CN)+'). Para esta empresa, que é do lucro real, esse IR é adiantamento: o imposto final é o da empresa, igual para qualquer opção.'),
+    h('li',null,h('b',{text:'Prazo do dinheiro: '}),nf(R.lad[0]/R.val*100,0)+'% volta em até 1 dia e o resgate mais longo é de '+R.maxd+' dias.'));
+  box.append(h('div',{class:'card extra'},h('h2',{text:'O que o simulador da XP não mostra'}),ex));
 }
 
-// ---------- lado a lado ----------
-function renderLado(){
-  const box=$('#lado');box.replaceChildren();const L=ST.lado.map(id=>BYID[id]).filter(Boolean);
-  if(!L.length){box.append(h('div',{class:'empty',text:'Nenhum ativo escolhido. Busque acima ou use "Comparar" na ficha de um ativo.'}));return}
-  const start=L.map(i=>Object.keys(i.mr).sort()[0]).reduce((a,b)=>a>b?a:b);const M=MONTHS.filter(k=>k>=start);
-  const cols=[css('--s1'),css('--s2'),css('--s3'),css('--s4')];
-  const series=L.map((i,q)=>{let a=1;return {name:short(i),color:cols[q],pts:[{v:0},...M.map(k=>{const m=i.mr[k];a*=1+(m?m[0]:0)/100;return {v:(a-1)*100}})]}});
-  let c=1;series.push({name:'CDI',color:css('--cdi'),dash:1,pts:[{v:0},...M.map(k=>{c*=1+D.cdiM[k]/100;return {v:(c-1)*100}})]});
-  const rows=[['Tipo',i=>i.t==='ETF'?i.c:catLabel(i.c)],['Gestora',i=>i.gest||'–'],['Nota',i=>i.nota==null?'–':nf(i.nota,1)],['Resgate',i=>'D+'+i.d],['Taxa de administração',i=>i.tx!=null?nf(i.tx,2)+'% ao ano':'–'],['Imposto',i=>irText(i)],
-    ...[['2026','a','2026'],['2025','a','2025'],['2024','a','2024'],['2023','a','2023']].map(([l,,y])=>['Retorno '+l+(y==='2026'?' (até 14/10)':''),i=>{const p=i.a[y];return p?nf(p[0],2)+'% ('+nf(pcdi(p),0)+'% do CDI)':'–'}]),
-    ['Retorno 12 meses',i=>i.w12?nf(i.w12[0],2)+'% ('+nf(pcdi(i.w12),0)+'% do CDI)':'–'],['Retorno 3 anos',i=>i.w36?nf(i.w36[0],2)+'% ('+nf(pcdi(i.w36),0)+'% do CDI)':'–'],
-    ['Queda máxima',i=>nf(i.dd,2)+'%'],['Oscilação',i=>i.vol==null?'–':nf(i.vol,2)+'%'],['Meses no CDI ou acima',i=>i.beat==null?'–':i.beat+'%'],
-    ['R$ 1 mi em 12 meses',i=>i.w12?brl(1e6*(1+i.w12[0]/100))+' antes do IR · '+brl(1e6*(1+i.w12[0]/100*(1-ir12(i))))+' depois':'–']];
-  const headCells=L.map((i,q)=>h('th',{class:'l',style:'white-space:normal;min-width:190px'},h('span',{style:'display:inline-block;width:14px;border-top:2px solid '+cols[q]+';margin-right:6px;vertical-align:middle'}),nameLink(i),h('div',null,h('button',{class:'rm',onclick:()=>ladoToggle(i.id)},'tirar'))));
-  const bodyRows=rows.map(([l,f])=>h('tr',null,h('td',{class:'l mut',text:l}),L.map(i=>h('td',{class:'l',style:'white-space:normal',text:f(i)}))));
-  box.append(h('div',{class:'tbl-wrap',style:'max-height:none'},h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:''}),headCells)),h('tbody',null,bodyRows))));
-  const cb=h('div',{class:'chart'});box.append(h('h3',{style:'margin-top:8px',text:'Rendimento acumulado desde '+ml(start)+' (período em que todos existem)'}),legend(series),cb);
-  lineChart(cb,series,{label:'Rendimento acumulado dos ativos lado a lado',fy:v=>nf(v,0)+'%',fx:j=>j===0?'início':ml(M[j-1]),tx:j=>j===0?'Início de '+ml(start):'Fim de '+ml(M[j-1]),fv:v=>nf(v,2)+'%'});
+// ---------- sugestões ----------
+function sugMix(s){const R=sim(sugPos(s),ST.val),w=win(R,12);return {r12:w.r,pc:w.r/w.c*100,gap:ST.val*(fidcEq(w)-w.r)/100,maxd:R.maxd,liq1:s.items.filter(x=>x.i.d<=1).reduce((a,x)=>a+x.w,0),R}}
+function renderSug(){
+  const box=$('section[data-panel="sug"]');box.replaceChildren();
+  box.append(h('div',{class:'card extra'},h('h2',{text:'Por que sair do FIDC agora'}),h('p',{style:'margin:0;max-width:95ch'},'O momento é ruim para crédito, com mais empresas entrando em recuperação judicial, e o FIDC concentra esse risco. A mediana dos FIDCs da XP rendeu ',h('b',{text:nf(FIDC_MED,2)+'% em 12 meses'}),', mas o resgate leva de 30 a 360 dias e um deles perdeu ',h('b',{text:nf(-FIDC_MIN,1)+'%'}),'. As três sugestões trocam um pouco de rendimento por caixa rápido e risco menor.')));
+  box.append(h('div',{class:'sugs'},SUG.map((s,j)=>{const m=sugMix(s),gap=m.gap;
+    return h('div',{class:'card sg',style:'--c:var('+s.c+')'},h('div',null,h('div',{class:'mut',style:'font-size:13.5px',text:s.n}),h('h2',{text:s.t})),h('p',{class:'mut',style:'margin:0;font-size:14.5px',text:s.obj}),
+      h('div',null,s.items.map(x=>h('div',{class:'a'},h('div',{class:'w',text:x.w+'%'}),h('div',{style:'min-width:0'},h('button',{class:'lnk',onclick:()=>openFicha(x.i.id),text:x.i.n}),h('p',{text:x.why}))))),
+      h('div',{class:'stats'},h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:nf(m.r12,2)+'%'}),h('div',{class:'k',text:'nos últimos 12 meses ('+nf(m.pc,0)+'% do CDI)'})),h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:'D+'+m.maxd}),h('div',{class:'k',text:'resgate mais longo'})),
+        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:m.liq1+'%'}),h('div',{class:'k',text:'em até 1 dia'})),h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:brl(Math.max(0,gap))}),h('div',{class:'k',text:'a menos que o FIDC por ano, em '+brl(ST.val)}))),
+      h('button',{class:'btn pri',onclick:()=>{loadSug(j);setTab('sim');scrollTo({top:0});toast(s.n+' no simulador')}},'Simular esta sugestão'))})));
 }
-$('#ldAdd').addEventListener('change',e=>{const i=IT.find(x=>x.n===e.target.value);if(i&&!ST.lado.includes(i.id))ladoToggle(i.id);e.target.value=''});
-$('#ldClear').addEventListener('click',()=>{ST.lado=[];save();refresh()});
 
-// ---------- mês a mês ----------
-function renderMapa(){
-  const sel=$('#hmSel').value;let L;
-  if(sel==='nota')L=IT.filter(i=>i.nota!=null).sort((a,b)=>b.nota-a.nota).slice(0,30);
-  else if(sel==='cen')L=ST.sc[ST.cur].pos.map(p=>BYID[p.id]);
-  else if(sel==='lado')L=ST.lado.map(id=>BYID[id]);
-  else L=sorted(filtered()).slice(0,60);
-  const hm=$('#hm');hm.replaceChildren();
-  if(!L.length){hm.style.gridTemplateColumns='1fr';hm.append(h('div',{class:'empty',text:'Nada para mostrar nesta escolha.'}));return}
-  hm.style.gridTemplateColumns='minmax(150px,260px) repeat('+MONTHS.length+',minmax(13px,1fr))';
-  hm.append(h('div',{class:'nm'}),...MONTHS.map(k=>h('div',{class:'mh',text:k.endsWith('01')?k.slice(0,4):(k.endsWith('07')?'jul':'')})));
-  const good=css('--hm-good'),bad=css('--hm-bad'),mid=css('--hm-mid');
-  L.forEach(i=>{hm.append(h('div',{class:'nm'},h('button',{class:'lnk',style:'font-weight:500',onclick:()=>openFicha(i.id),text:i.n})));
-    MONTHS.forEach(k=>{const m=i.mr[k];let bg='transparent';
-      if(m&&m[1]>0){const x=m[0]/m[1]*100;if(x>=102){const t=Math.min(1,(x-100)/35);bg='rgba('+good+','+(.18+.62*t).toFixed(2)+')'}else if(x<=98){const t=Math.min(1,(100-x)/45);bg='rgba('+bad+','+(.18+.62*t).toFixed(2)+')'}else bg=mid}
-      hm.append(h('div',{class:'c',style:'background:'+bg,'data-i':i.id,'data-k':k}))})});
+// ---------- comparar ----------
+function renderCmp(){
+  const box=$('section[data-panel="cmp"]');box.replaceChildren();
+  const list=[];const cur=ST.pos.length&&Math.abs(wsum()-100)<0.01&&!SUG.some(s=>s.n===ST.from)?{name:'Sua carteira',color:css('--s4'),pos:ST.pos}:null;
+  if(cur)list.push(cur);SUG.forEach((s,j)=>list.push({name:s.n,color:css(s.c),pos:sugPos(s),sub:s.t}));
+  const start=list.map(x=>sim(x.pos,ST.val).lim).reduce((a,b)=>a>b?a:b);
+  list.forEach(x=>x.R=sim(x.pos,ST.val,start));
+  const w0=win(list[0].R,12),fe=w0?fidcEq(w0):null;
+  const rows=[['Rendeu nos últimos 12 meses',x=>{const w=win(x.R,12);return w?nf(w.r,2)+'% ('+nf(w.r/w.c*100,0)+'% do CDI)':'–'},fe==null?'–':nf(fe,2)+'% ('+nf(FIDC_PC*100,0)+'% do CDI)'],
+    ['Em reais, em 12 meses',x=>{const w=win(x.R,12);return w?brl(ST.val*w.r/100):'–'},fe==null?'–':brl(ST.val*fe/100)],
+    ['Diferença para o FIDC, em 12 meses',x=>{const w=win(x.R,12);return w?(w.r>=fe?'+ ':'- ')+brl(Math.abs(ST.val*(w.r-fe)/100)):'–'},'–'],
+    ['Desde '+ml(start),x=>nf((x.R.G/x.R.val-1)*100,2)+'% ('+nf((x.R.G/x.R.val-1)/(x.R.C/x.R.val-1)*100,0)+'% do CDI)','–'],
+    ['Resgatável em até 1 dia',x=>nf(x.R.lad[0]/x.R.val*100,0)+'%','0%'],
+    ['Resgate mais longo',x=>x.R.maxd<=1?'1 dia':x.R.maxd+' dias','30 a 360 dias'],
+    ['Meses abaixo do CDI',x=>x.R.below+' de '+x.R.full.length,'–'],
+    ['Pior mês',x=>x.R.worst?nf(x.R.worst.r*100,2)+'% em '+ml(x.R.worst.k):'–','um FIDC perdeu '+nf(-FIDC_MIN,1)+'% em 12 meses']];
+  const ccards=h('div',{class:'only-cel'},h('div',{class:'mc'},[...list.map(x=>({name:x.name,sub:x.sub,color:x.color,vals:rows.map(([l,f])=>[l,f(x)])})),{name:'FIDC (mediana XP)',color:css('--warn'),vals:rows.map(([l,f,fd])=>[l,fd]).filter(([l,v])=>v!=='–')}].map(c=>h('div',{class:'lc',style:'border-left:4px solid '+c.color},h('div',null,h('b',{style:'color:'+c.color,text:c.name}),c.sub?h('span',{class:'mut',text:' · '+c.sub}):null),c.vals.map(([l,v])=>h('div',{class:'r'},h('span',{text:l}),h('b',{style:'text-align:right',text:v})))))));
+  const head=h('tr',null,h('th',{class:'l',text:''}),list.map(x=>h('th',{class:'l',style:'color:'+x.color},x.name,x.sub?h('div',{class:'mut',style:'font-weight:400;font-size:13px',text:x.sub}):null)),h('th',{class:'l',text:'FIDC (mediana XP)'}));
+  const body=rows.map(([l,f,fd])=>h('tr',null,h('td',{class:'l mut',text:l}),list.map(x=>h('td',{class:'l',style:'white-space:normal;min-width:150px',text:f(x)})),h('td',{class:'l',style:'white-space:normal;min-width:150px',text:fd})));
+  box.append(h('div',{class:'card'},h('h2',{text:'Lado a lado, no mesmo período'}),h('div',{class:'note',text:cur?'Inclui a carteira que está no Simulador.':'Monte uma carteira com 100% no Simulador para ela aparecer aqui também.'}),h('div',{class:'tw only-desk'},h('table',null,h('thead',null,head),h('tbody',null,body))),ccards));
+  const hc=histChart(list,'cv2','ex');box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',{text:'Desde '+ml(start)+', lado a lado'}),hc.seg),hc.el));hc.draw();
 }
-$('#hmSel').addEventListener('change',renderMapa);
-(function(){const tip=$('#tip');const show=e=>{const c=e.target.closest('.c');if(!c||!c.dataset.i){tip.hidden=true;return}const i=BYID[c.dataset.i],k=c.dataset.k,m=i.mr[k];
-  tip.replaceChildren(h('div',{class:'dim',text:short(i)+' · '+ml(k)}),m?h('div',null,h('b',{text:nf(m[0],2)+'%'}),' no mês · CDI '+nf(m[1],2)+'% · ',h('b',{text:nf(m[0]/m[1]*100,0)+'% do CDI'})):h('div',{text:'Sem dado neste mês'}));
-  tip.hidden=false;tip.style.position='absolute';let x=e.pageX+14;if(x+260>window.scrollX+innerWidth)x=e.pageX-270;tip.style.left=x+'px';tip.style.top=(e.pageY+14)+'px'};
-  $('#hm').addEventListener('pointermove',show);$('#hm').addEventListener('pointerdown',show);$('#hm').addEventListener('pointerleave',()=>tip.hidden=true)})();
+
+// ---------- lista de ativos ----------
+const LF={cats:new Set(['High Grade','High Yield','ETF']),q:'',sort:'nota',dir:-1};
+const SORTS=[['nota','Nota',-1],['w12','Retorno em 12 meses',-1],['w36','Retorno em 3 anos',-1],['d','Resgate mais rápido',1],['tx','Menor taxa',1],['n','Nome',1]];
+const sval=(i,k)=>k==='nota'?i.nota:k==='w12'?pcdi(i.w12):k==='w36'?pcdi(i.w36):k==='d'?i.d:k==='tx'?i.tx:i.n.toLowerCase();
+function openList(){
+  const fx=$('#fx');const close=()=>{$('#ov').hidden=true;document.body.style.overflow=''};
+  function draw(){fx.replaceChildren();
+    fx.append(h('div',{class:'card-h'},h('h2',{text:'Todos os ativos'}),h('button',{class:'btn',onclick:close},'Fechar ✕')));
+    fx.append(h('div',{class:'row'},[['High Grade','High Grade'],['High Yield','High Yield'],['ETF','ETFs'],['Infra CDI','Infra CDI'],['Liquidez longa','Prazo longo (FIDC e afins)']].map(([k,l])=>h('button',{class:'btn sm'+(LF.cats.has(k)?' on':''),onclick:()=>{LF.cats.has(k)?LF.cats.delete(k):LF.cats.add(k);draw()}},l))));
+    const qi=h('input',{type:'search',placeholder:'Buscar',value:LF.q,'aria-label':'Buscar na lista',style:'flex:1;min-width:160px'});qi.addEventListener('input',()=>{LF.q=qi.value;drawList()});
+    const so=h('select',{'aria-label':'Ordenar por'},SORTS.map(([k,l])=>h('option',{value:k,text:'Ordenar: '+l})));so.value=LF.sort;so.addEventListener('change',()=>{const s=SORTS.find(x=>x[0]===so.value);LF.sort=s[0];LF.dir=s[2];drawList()});
+    const di=h('button',{class:'btn sm',onclick:()=>{LF.dir*=-1;drawList()}});
+    fx.append(h('div',{class:'row'},qi,so,di));const lb=h('div',{style:'display:flex;flex-direction:column;gap:8px'});fx.append(lb);
+    function drawList(){di.textContent=LF.dir<0?'↓ Decrescente':'↑ Crescente';const q=LF.q.trim().toLowerCase();
+      const L=IT.filter(i=>LF.cats.has(i.c.startsWith('ETF')?'ETF':i.c)&&(!q||(i.n+' '+(i.tk||'')+' '+(i.gest||'')).toLowerCase().includes(q))).sort((a,b)=>{const x=sval(a,LF.sort),y=sval(b,LF.sort);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return (x>y?1:x<y?-1:0)*LF.dir});
+      lb.replaceChildren(h('div',{class:'note',text:L.length+' ativos'}),...L.map(i=>{const inC=ST.pos.some(p=>p.id===i.id);return h('div',{class:'lc'},h('div',{class:'r'},h('button',{class:'lnk',style:'color:var(--fg)',onclick:()=>openFicha(i.id),text:i.n}),h('span',{class:'nota',text:i.nota==null?'–':nf(i.nota,1)})),
+        h('div',{class:'row'},h('span',{class:'pill '+pillOf(i.c),text:catLabel(i.c)}),h('span',{class:'pill p-d',text:'Resgate D+'+i.d}),i.tx!=null?h('span',{class:'pill p-d',text:'Taxa '+nf(i.tx,2)+'%'}):null),
+        h('div',{class:'r'},h('span',null,'12 meses ',h('b',{text:i.w12?nf(pcdi(i.w12),0)+'% do CDI':'–'})),h('span',null,'3 anos ',h('b',{text:i.w36?nf(pcdi(i.w36),0)+'% do CDI':'–'}))),
+        i.fl.length?h('div',{class:'warn',style:'font-size:13px',text:i.fl[0]}):null,
+        h('div',null,h('button',{class:'btn sm'+(inC?' on':''),onclick:()=>{if(!inC){addAsset(i.id);drawList()}}},inC?'✓ Na carteira':'+ Adicionar à carteira')))}))}
+    drawList()}
+  draw();$('#ov').hidden=false;document.body.style.overflow='hidden';
+}
 
 // ---------- ficha ----------
+const irText=i=>i.reg==='etf'?('IR de '+i.irr+'% na venda, sem come-cotas e sem IOF'+(/Crédito DI|exterior/.test(i.c)?' (alíquota a confirmar)':'')):i.reg==='infra'?'Empresa paga 15% no resgate, sem come-cotas':i.reg==='cp'?'Come-cotas de 20% em maio e novembro; 22,5% ou 20% no resgate':'Come-cotas de 15% em maio e novembro; no resgate, 22,5% a 15% conforme o prazo';
 function openFicha(id){
-  const i=BYID[id];const fx=$('#fx');fx.replaceChildren();
-  const close=()=>{$('#ov').hidden=true;$('#tip').hidden=true;document.body.style.overflow=''};
-  fx.append(h('div',{class:'hd'},h('div',null,h('h2',{id:'fxT',style:'margin-bottom:6px',text:i.n}),h('div',{style:'display:flex;gap:6px;flex-wrap:wrap'},tags(i),notaEl(i.nota))),h('button',{class:'btn',onclick:close,'aria-label':'Fechar'},'Fechar ✕')));
-  fx.append(h('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},ST.sc.map((s,j)=>{const on=s.pos.some(p=>p.id===id);return h('button',{class:'btn sm'+(on?' on':''),onclick:()=>{on?remSc(id,j):addSc(id,j);openFicha(id)}},on?'✓ No Cenário '+(j+1):'+ Cenário '+(j+1))}),h('button',{class:'btn sm'+(ST.lado.includes(id)?' on':''),onclick:()=>{ladoToggle(id);openFicha(id)}},ST.lado.includes(id)?'✓ No Lado a lado':'Comparar lado a lado')));
+  const i=BYID[id];const fx=$('#fx');fx.replaceChildren();const close=()=>{$('#ov').hidden=true;$('#tip').hidden=true;document.body.style.overflow=''};
+  const inC=ST.pos.some(p=>p.id===id);
+  fx.append(h('div',{class:'card-h'},h('div',null,h('h2',{text:i.n}),h('div',{class:'row',style:'margin-top:6px'},h('span',{class:'pill '+pillOf(i.c),text:catLabel(i.c)}),h('span',{class:'nota',text:i.nota==null?'–':'Nota '+nf(i.nota,1)}))),h('button',{class:'btn',onclick:close},'Fechar ✕')));
+  fx.append(h('div',null,h('button',{class:inC?'btn on':'btn pri',onclick:()=>{if(!inC){addAsset(id);openFicha(id)}}},inC?'✓ Na carteira':'+ Adicionar à carteira')));
   if(i.fl.length)fx.append(h('div',{class:'warn',text:i.fl.join(' · ')}));
-  const kv=[['Gestora',i.gest||'–'],i.adm?['Administrador',i.adm]:null,i.t==='ETF'?['Código na bolsa',i.tk]:['CNPJ',i.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5')],['Resgate',i.liq+(i.d===0?' (no mesmo dia)':' (cerca de '+i.d+(i.d===1?' dia)':' dias)'))],i.t==='ETF'?['Giro na bolsa','R$ '+nf(i.adv,1)+' mi por dia, em média']:['Patrimônio',i.pl!=null?'R$ '+nf(i.pl,0)+' mi'+(i.cot?' · '+i.cot.toLocaleString('pt-BR')+' cotistas':''):'–'],i.t==='ETF'?null:['Aplicação mínima',brl(i.min)],['Taxa de administração',i.tx!=null?nf(i.tx,2)+'% ao ano (já descontada no retorno)':'Não informada na CVM; ver lâmina'],i.t==='ETF'?null:['Taxa de performance',i.perf||'Não informada'],['Imposto (empresa)',irText(i)],i.t==='ETF'?null:['Nota de risco XP',String(i.risco)],['Dados desde',dbr(i.ini)]].filter(Boolean);
-  fx.append(h('dl',{class:'kv'},kv.flatMap(([k,v])=>[h('dt',{text:k}),h('dd',{text:v})])));
-  if(i.w12){const g=i.w12[0]/100,t=ir12(i);fx.append(h('div',{class:'panel'},h('div',{class:'mut',text:'R$ 1 milhão nos últimos 12 meses'}),h('div',{class:'say'},'Viraria ',h('b',{text:brl(1e6*(1+g))}),' antes do IR e ',h('b',{text:brl(1e6*(1+g*(1-t)))}),' depois do IR na fonte ('+nf(t*100,1)+'% sobre o ganho, resgate com 1 ano). O CDI daria '+brl(1e6*(1+i.w12[1]/100))+' antes do IR.')))}
-  const yrs=['2022','2023','2024','2025','2026'];
-  const per=[...yrs.map(y=>[y+(y==='2026'?' (até 14/10)':''),i.a[y]]),['12 meses',i.w12],['2 anos',i.w24],['3 anos',i.w36]];
-  const perRows=per.map(([l,p])=>h('tr',null,h('td',{class:'l',text:l}),h('td',{text:p?nf(p[0],2)+'%':'–'}),h('td',{class:'dim',text:p?nf(p[1],2)+'%':'–'}),h('td',{class:p&&pcdi(p)<90?'warn':null,text:p?nf(pcdi(p),0)+'%':'–'})));
-  const perHead=h('thead',null,h('tr',null,h('th',{class:'l',text:'Período'}),h('th',{text:'Rendeu'}),h('th',{text:'CDI'}),h('th',{text:'% do CDI'})));
-  fx.append(h('h3',{text:'Retorno por período'}),h('div',{class:'tbl-wrap',style:'max-height:none'},h('table',null,perHead,h('tbody',null,perRows))));
-  const M=MONTHS.filter(k=>i.mr[k]);if(M.length>2){let a=1,c=1;const s=[{name:short(i),color:css('--s1'),pts:[{v:0},...M.map(k=>{a*=1+i.mr[k][0]/100;return {v:(a-1)*100}})]},{name:'CDI',color:css('--cdi'),dash:1,pts:[{v:0},...M.map(k=>{c*=1+D.cdiM[k]/100;return {v:(c-1)*100}})]}];
-    const cb=h('div',{class:'chart'});fx.append(h('h3',{text:'Rendimento acumulado desde '+ml(M[0])}),legend(s),cb);$('#ov').hidden=false;document.body.style.overflow='hidden';
-    lineChart(cb,s,{h:230,label:'Rendimento acumulado do ativo contra o CDI',fy:v=>nf(v,0)+'%',fx:j=>j===0?'início':ml(M[j-1]),tx:j=>j===0?'Início':'Fim de '+ml(M[j-1]),fv:v=>nf(v,2)+'%'})}
-  $('#ov').hidden=false;document.body.style.overflow='hidden';fx.focus?.();
+  const kv=[['Gestora',i.gest||'–'],i.t==='ETF'?['Código na bolsa',i.tk]:['CNPJ',i.cnpj.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,'$1.$2.$3/$4-$5')],['Resgate',i.liq+(i.d===0?' (no mesmo dia)':' (cerca de '+i.d+(i.d===1?' dia)':' dias)'))],i.t==='ETF'?['Giro na bolsa','R$ '+nf(i.adv,1)+' mi por dia']:['Patrimônio',i.pl!=null?'R$ '+nf(i.pl,0)+' mi':'–'],i.t==='ETF'?null:['Aplicação mínima',brl(i.min)],['Taxa de administração',i.tx!=null?nf(i.tx,2)+'% ao ano (já descontada no retorno)':'Ver lâmina'],i.t==='ETF'?null:['Taxa de performance',i.perf||'Não informada'],['Imposto',irText(i)],['Dados desde',i.ini.split('-').reverse().join('/')]].filter(Boolean);
+  fx.append(h('div',{class:'card'},h('dl',{class:'kv',style:'margin:0'},kv.flatMap(([k,v])=>[h('dt',{text:k}),h('dd',{text:v})]))));
+  const per=[...['2022','2023','2024','2025','2026'].map(y=>[y+(y==='2026'?' (até 14/10)':''),i.a[y]]),['12 meses',i.w12],['24 meses',i.w24],['36 meses',i.w36]];
+  const pt=h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:'Período'}),h('th',{text:'Rendeu'}),h('th',{text:'CDI'}),h('th',{text:'% do CDI'}))),h('tbody',null,per.map(([l,p])=>h('tr',null,h('td',{class:'l',text:l}),h('td',{text:p?nf(p[0],2)+'%':'–'}),h('td',{class:'mut',text:p?nf(p[1],2)+'%':'–'}),h('td',{class:p&&pcdi(p)<95?'warn':null,text:p?nf(pcdi(p),0)+'%':'–'})))));
+  fx.append(h('div',{class:'card'},h('h3',{text:'Rentabilidade'}),h('div',{class:'tw'},pt)));
+  const M=MONTHS.filter(k=>i.mr[k]);$('#ov').hidden=false;document.body.style.overflow='hidden';
+  if(M.length>2){let a=1,c=1;const s=[{name:short(i),color:css('--s1'),pts:[{v:0},...M.map(k=>{a*=1+i.mr[k][0]/100;return {v:(a-1)*100}})]},{name:'CDI',color:css('--cdi'),dash:1,pts:[{v:0},...M.map(k=>{c*=1+D.cdiM[k]/100;return {v:(c-1)*100}})]}];
+    const cb=h('div',{class:'chart'});fx.append(h('div',{class:'card'},h('h3',{text:'Acumulado desde '+ml(M[0])}),legend(s),cb));lineChart(cb,s,{h:230,label:'Rendimento acumulado do ativo contra o CDI',fy:v=>nf(v,0)+'%',fx:j=>j===0?'início':ml(M[j-1]),tx:j=>j===0?'Início':'Fim de '+ml(M[j-1]),fv:v=>nf(v,2)+'%'})}
 }
-$('#ov').addEventListener('click',e=>{if(e.target.id==='ov'){$('#ov').hidden=true;$('#tip').hidden=true;document.body.style.overflow=''}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#ov').hidden){$('#ov').hidden=true;$('#tip').hidden=true;document.body.style.overflow=''}});
+$('#ov').addEventListener('click',e=>{if(e.target.id==='ov'){$('#ov').hidden=true;$('#tip').hidden=true;document.body.style.overflow='';renderTab()}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#ov').hidden){$('#ov').hidden=true;$('#tip').hidden=true;document.body.style.overflow='';renderTab()}});
 
-// ---------- sugestão do estrategista ----------
-const FIDC_MED=15.74, FIDC_MIN=-43.81, CDI12=D.cdiY['12M'];
-const SUG=[
- {n:'Sugestão 1',t:'Segurança máxima',c:'--s1',obj:'Tudo resgatável em até 1 dia. Título público e fundos de crédito bancário e referenciado DI com nota de risco 2 da XP (a mais baixa entre os fundos de crédito).',
-  pos:[['LFTS11',30,'Tesouro Selic na bolsa. Risco do governo, vende em 1 dia.'],['XP Bancos FIRF Referenciada DI CP RL',35,'Crédito de bancos, resgate no mesmo dia. Na crise de crédito de 2023 (jan a abr) rendeu 100% do CDI.'],['Mapfre Confianza FIF RF Referenciado DI CP RL',35,'Fundo de R$ 19 bilhões, resgate no mesmo dia, 109% do CDI em 3 anos e nenhum mês abaixo do CDI no último ano.']]},
- {n:'Sugestão 2',t:'Equilíbrio',c:'--s2',obj:'Um terço em título público e o resto em crédito de alta qualidade de fundos grandes. Tudo resgatável em até 10 dias.',
-  pos:[['LFTB11',35,'Tesouro Selic + IPCA na bolsa, IR na fonte de 15%, vende em 1 dia. 104% do CDI em 12 meses.'],['ARX Fuji FIC de FIF RF CP RL',35,'Crédito high grade, fundo de R$ 9,7 bilhões, resgate em 1 dia, 108% do CDI em 3 anos.'],['BNP Paribas Rubi FIF RF CP RL',30,'Crédito high grade, R$ 4 bilhões, resgate em 10 dias, 107% do CDI em 3 anos e 96% do CDI na crise de 2023.']]},
- {n:'Sugestão 3',t:'Mais rendimento, ainda líquido',c:'--s3',obj:'A mais perto do que o FIDC paga, com resgate em até 32 dias e 30% em título público como colchão.',
-  pos:[['Compass Yield 30 FIF RF CP LP RL',40,'114% do CDI em 3 anos, fundo de R$ 2,1 bilhões, resgate em 30 dias. Na crise de 2023 rendeu 94% do CDI.'],['M8 Capital Plus FI RF CP RL LP',30,'110% do CDI em 3 anos, resgate em 32 dias. Sentiu a crise de 2023 (60% do CDI no período).'],['LFTB11',30,'Tesouro Selic + IPCA na bolsa: a parte que dá segurança e caixa em 1 dia.']]}];
-SUG.forEach(s=>s.items=s.pos.map(([n,w,why])=>({i:pick(n),w,why})).filter(x=>x.i));
-function sugMix(s){const W=s.items.reduce((a,x)=>a+x.w,0);const r12=s.items.every(x=>x.i.w12)?s.items.reduce((a,x)=>a+x.w*x.i.w12[0],0)/W:null;
-  const lad=[0,0,0,0];s.items.forEach(x=>{const d=x.i.d;lad[d<=1?0:d<=15?1:d<=35?2:3]+=x.w/W});const cred=s.items.filter(x=>!/Selic/.test(x.i.c)).reduce((a,x)=>a+x.w,0)/W;const maxd=Math.max(...s.items.map(x=>x.i.d));return {r12,lad,cred,maxd}}
-function worst12(i){const ks=Object.keys(i.mr).sort();let w=null;for(let a=0;a+12<=ks.length;a++){let x=1;for(let b=a;b<a+12;b++)x*=1+i.mr[ks[b]][0]/100;x=(x-1)*100;if(w==null||x<w)w=x}return w}
-function loadSug(j,n){const s=SUG[j];ST.sc[n]={val:ST.sgVal||5e6,pos:s.items.map(x=>({id:x.i.id,w:x.w}))};save()}
-function renderSug(){
-  const box=$('#sugBox');box.replaceChildren();const V=ST.sgVal||5e6;
-  box.append(h('div',{class:'callout'},h('h3',{style:'margin:0',text:'Por que sair do FIDC agora'}),
-    h('p',null,'Leitura do escritório: o momento é ruim para crédito, com mais empresas entrando em recuperação judicial. O FIDC concentra esse risco em recebíveis e prende o caixa por mais tempo.'),
-    h('p',null,'Na prateleira da XP, a mediana dos FIDCs rendeu ',h('b',{text:nf(FIDC_MED,2)+'% em 12 meses ('+nf(FIDC_MED/CDI12*100,0)+'% do CDI)'}),', mas o resgate leva de 30 a 360 dias e o pior deles perdeu ',h('b',{text:nf(-FIDC_MIN,1)+'%'}),' no mesmo período (XP SS 1, um FIDC não padronizado).'),
-    h('p',null,'As três sugestões trocam um pouco de rendimento por caixa em até 35 dias e risco bem menor.')));
-  const val=h('input',{type:'text',inputmode:'numeric',value:V.toLocaleString('pt-BR'),'aria-label':'Valor total em reais',style:'width:150px'});
-  val.addEventListener('change',()=>{const v=parseFloat(val.value.replace(/[^\d,]/g,'').replace(',','.'));if(v>0){ST.sgVal=v;save();renderSug()}else val.value=V.toLocaleString('pt-BR')});
-  box.append(h('div',{class:'bar'},h('span',{class:'mut',text:'Valor total (FIDC + aporte): R$'}),val,...[5e6,10e6,15e6].map(v=>h('button',{class:'btn sm'+(V===v?' on':''),onclick:()=>{ST.sgVal=v;save();renderSug()}},nf(v/1e6,0)+' mi')),
-    h('button',{class:'btn pri',style:'margin-left:auto',onclick:()=>{[0,1,2].forEach(j=>loadSug(j,j));ST.cur=0;save();toast('As 3 sugestões viraram os Cenários 1, 2 e 3');setTab('comparar');window.scrollTo({top:0})}},'Comparar as 3 sugestões')));
-  box.append(h('div',{class:'sug'},SUG.map((s,j)=>{const m=sugMix(s);const gap=m.r12!=null?(FIDC_MED-m.r12)/100*V:null;
-    return h('div',{class:'sg',style:'--c:var('+s.c+')'},h('div',null,h('div',{class:'mut',style:'font-size:13px',text:s.n}),h('h3',{text:s.t})),h('p',{class:'obj',text:s.obj}),
-      h('div',null,s.items.map(x=>h('div',{class:'a'},h('div',{class:'w',text:x.w+'%'}),h('div',{style:'min-width:0'},nameLink(x.i),h('div',{style:'display:flex;gap:4px;margin-top:3px;flex-wrap:wrap'},tags(x.i),h('span',{class:'pill p-gr',text:'D+'+x.i.d})),h('p',{text:x.why}),h('div',{class:'mut',style:'font-size:12.5px',text:brl(V*x.w/100)}))))),
-      h('div',{class:'big'},h('div',{class:'kpi'},h('div',{class:'v',text:m.r12!=null?nf(m.r12,2)+'%':'–'}),h('div',{class:'k',text:'rendeu em 12 meses ('+(m.r12!=null?nf(m.r12/CDI12*100,0):'–')+'% do CDI)'})),
-        h('div',{class:'kpi'},h('div',{class:'v',text:'D+'+m.maxd}),h('div',{class:'k',text:'prazo do resgate mais longo'})),
-        h('div',{class:'kpi'},h('div',{class:'v',text:nf(m.cred*100,0)+'%'}),h('div',{class:'k',text:'em fundos de crédito (FIDC: 100%)'})),
-        h('div',{class:'kpi'},h('div',{class:'v',text:gap!=null?brl(Math.max(0,gap)):'–'}),h('div',{class:'k',text:'a menos que a mediana dos FIDCs, por ano'}))),
-      ladderEl(m.lad.map(x=>x*V),V),
-      h('div',{style:'display:flex;gap:8px;flex-wrap:wrap'},h('button',{class:'btn pri',onclick:()=>{loadSug(j,j);ST.cur=j;save();toast(s.n+' aberta no Cenário '+(j+1));setTab('cenario');window.scrollTo({top:0})}},'Abrir no simulador')))})));
-  const rows=[['Rendeu em 12 meses',s=>{const m=sugMix(s);return nf(m.r12,2)+'% ('+nf(m.r12/CDI12*100,0)+'% do CDI)'},nf(FIDC_MED,2)+'% ('+nf(FIDC_MED/CDI12*100,0)+'% do CDI), mediana'],
-    ['Prazo para ter o dinheiro',s=>{const d=sugMix(s).maxd;return d<=1?'até 1 dia':'até '+d+' dias'},'de 30 a 360 dias'],
-    ['Quanto em fundos de crédito',s=>nf(sugMix(s).cred*100,0)+'%','100%'],
-    ['Pior janela de 12 meses de um ativo',s=>{const w=Math.min(...s.items.map(x=>worst12(x.i)).filter(v=>v!=null));return (w>=0?'+':'')+nf(w,1)+'% (nenhum perdeu dinheiro em 12 meses)'},'um FIDC perdeu '+nf(-FIDC_MIN,1)+'% nos últimos 12 meses'],
-    ['Diferença por ano em '+brl(V),s=>{const m=sugMix(s);return brl(Math.max(0,(FIDC_MED-m.r12)/100*V))+' a menos'},'referência']];
-  box.append(h('h3',{style:'margin:6px 0 0',text:'As 3 sugestões contra o FIDC'}),h('div',{class:'tbl-wrap',style:'max-height:none'},h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:''}),SUG.map(s=>h('th',{class:'l',style:'color:var('+s.c+')',text:s.n+' · '+s.t})),h('th',{class:'l',text:'FIDC (prateleira XP)'}))),
-    h('tbody',null,rows.map(([l,f,fd])=>h('tr',null,h('td',{class:'l mut',text:l}),SUG.map(s=>h('td',{class:'l',style:'white-space:normal;min-width:170px',text:f(s)})),h('td',{class:'l',style:'white-space:normal;min-width:170px',text:fd})))))));
-  box.append(h('div',{class:'callout'},h('h3',{style:'margin:0',text:'Imposto desta empresa'}),
-    h('p',null,'Com faturamento de R$ 3 bilhões, a empresa é obrigada ao ',h('b',{text:'lucro real'}),' (o limite é R$ 78 milhões por ano). Então o rendimento de qualquer opção, inclusive do FIDC, entra no imposto da empresa: IRPJ e CSLL de até 34%, mais 4,65% de PIS e COFINS sobre receita financeira.'),
-    h('p',null,'O IR retido na fonte (15% no ETF, até 22,5% no fundo) é descontado depois. Por isso a comparação justa é pelo rendimento bruto: a alíquota da fonte mexe no caixa, não no imposto final. Vale confirmar com o contador da empresa.'),
-    h('p',{class:'dim',style:'font-size:13px',text:'Sugestões para discussão interna, feitas com o histórico até 14/10/2026. Rentabilidade passada não garante a futura. Confirmar suitability e aplicação mínima antes de apresentar.'})));
-}
-// ---------- versão computador / celular ----------
-const isCel=()=>document.documentElement.dataset.tela==='celular';
-function applyTela(){const pref=store.get('cpj.tela','auto');const small=Math.min(screen.width||9999,window.outerWidth||9999)<760;const mode=pref==='auto'?((small||innerWidth<760)?'celular':'computador'):pref;
-  document.documentElement.dataset.tela=mode;$$('meta[name=viewport]').forEach(vp=>vp.setAttribute('content',(mode==='computador'&&small)?'width=1280':'width=device-width, initial-scale=1, viewport-fit=cover'));
-  $$('#telaSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===mode)))}
-$$('#telaSeg button').forEach(b=>b.addEventListener('click',()=>{store.set('cpj.tela',b.dataset.t);applyTela();refresh()}));
-
-// ---------- abas e modo ----------
+// ---------- abas, tela ----------
+const inIframe=(()=>{try{return window.self!==window.top}catch(e){return true}})();
 function setTab(t){ST.tab=t;save();$$('.tab').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===t)));$$('section[data-panel]').forEach(s=>s.hidden=s.dataset.panel!==t);$('#tip').hidden=true;renderTab()}
-function renderTab(){const t=ST.tab;if(t==='destaques')renderTop();if(t==='sugestao')renderSug();if(t==='lista')renderList();if(t==='cenario')renderScenario();if(t==='comparar')renderCompare();if(t==='lado')renderLado();if(t==='mapa')renderMapa()}
-$$('.tab').forEach(b=>b.addEventListener('click',()=>{setTab(b.dataset.tab);window.scrollTo({top:0})}));
-function counts(){$('#tN').textContent=String(ST.sc[ST.cur].pos.length);$('#lN').textContent=String(ST.lado.length)}
-function refresh(){counts();renderTab()}
-function setModo(cli){document.documentElement.dataset.modo=cli?'cliente':'';if(!cli)delete document.documentElement.dataset.modo;$('#mCli').checked=cli;store.set('cpj.modo',cli);refresh()}
-$('#mCli').addEventListener('change',e=>setModo(e.target.checked));
-$('#dl').append(...IT.map(i=>h('option',{value:i.n})));
-let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{applyTela();renderTab()},160)});
+function renderTab(){if(ST.tab==='sim')renderSim();if(ST.tab==='sug')renderSug();if(ST.tab==='cmp')renderCmp()}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>{setTab(b.dataset.tab);scrollTo({top:0})}));
+function applyTela(){const pref=store.get('cpj.tela','auto');const small=Math.min(screen.width||9999,window.outerWidth||9999)<760;const mode=pref==='auto'?((small||innerWidth<760)?'celular':'computador'):pref;
+  document.documentElement.dataset.tela=mode;$$('meta[name=viewport]').forEach(vp=>vp.setAttribute('content',(mode==='computador'&&small)?'width=1200':'width=device-width, initial-scale=1, viewport-fit=cover'));
+  $$('#telaSeg button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.t===mode)))}
+$$('#telaSeg button').forEach(b=>b.addEventListener('click',()=>{store.set('cpj.tela',b.dataset.t);applyTela();renderTab()}));
+let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{applyTela();renderTab()},160)});
 applyTela();
 const hash=(location.hash||'').slice(1);
-const cli=hash==='cliente'||store.get('cpj.modo',false);
-if(cli)document.documentElement.dataset.modo='cliente';$('#mCli').checked=!!cli;
-const tabs=['destaques','sugestao','lista','cenario','comparar','lado','mapa','ajuda'];
-counts();setTab(tabs.includes(hash)?hash:(tabs.includes(ST.tab)?ST.tab:'destaques'));
+setTab(['sim','sug','cmp','ajuda'].includes(hash)?hash:(['sim','sug','cmp','ajuda'].includes(ST.tab)?ST.tab:'sim'));
 })();
 </script>
 
