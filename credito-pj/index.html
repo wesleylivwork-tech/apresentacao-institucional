@@ -107,6 +107,10 @@ th.l,td.l{text-align:left}
 .lc{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:6px;background:var(--card)}
 .lc .r{display:flex;justify-content:space-between;gap:8px;font-size:14px;color:var(--mut)}
 .lc .r b{color:var(--fg)}
+.cmpsel{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:end}
+.cmpsel label{display:flex;flex-direction:column;gap:4px;min-width:0}
+:root[data-tela="celular"] .cmpsel{grid-template-columns:minmax(0,1fr)}
+.cmpt td{white-space:normal}
 .alerts{display:flex;flex-direction:column;gap:6px}
 .al{border-left:4px solid var(--warn);background:#F7F0EC;padding:8px 12px;border-radius:6px;font-size:14.5px;max-width:110ch}
 .al.neu{border-left-color:var(--hi);background:var(--soft)}
@@ -156,16 +160,17 @@ th.l,td.l{text-align:left}
 
   <nav class="tabs" role="tablist" aria-label="Seções">
     <button class="tab" role="tab" data-tab="sim">Simulador</button>
-    <button class="tab" role="tab" data-tab="sug"><span class="only-desk">Sugestões do estrategista</span><span class="only-cel">Sugestões</span></button>
+    <button class="tab" role="tab" data-tab="sug">Modelos</button>
     <button class="tab" role="tab" data-tab="cmp">Comparar</button>
     <button class="tab" role="tab" data-tab="ajuda">Como ler</button>
   </nav>
 
   <section data-panel="sim">
+    <div class="card noprint" id="simbar"></div>
     <div class="card">
       <h2><span class="num">1</span>Valor da simulação</h2>
       <div class="row"><span class="mut">R$</span><input type="text" id="val" inputmode="numeric" aria-label="Valor da simulação em reais" style="width:180px"><span id="valBtns" class="row"></span></div>
-      <div class="row noprint"><span class="mut">Começar por uma sugestão:</span><span id="quick" class="row"></span></div>
+      <div class="row noprint"><span class="note">Quer começar de uma carteira pronta?</span><button class="btn sm" id="goMod">Ver modelos</button></div>
     </div>
     <div class="card">
       <div class="card-h"><h2><span class="num">2</span>Ativos e percentual</h2><button class="btn sm noprint" id="all">Ver todos os ativos</button></div>
@@ -189,6 +194,9 @@ th.l,td.l{text-align:left}
         <li><b>Imposto da empresa:</b> com faturamento de R$ 3 bilhões, a empresa é obrigada ao lucro real (o limite é R$ 78 milhões por ano). O rendimento de qualquer opção, inclusive do FIDC, entra no imposto da empresa (IRPJ e CSLL de até 34%, mais 4,65% de PIS e COFINS). O IR retido na fonte é descontado depois, então ele mexe no caixa e não no imposto final. Confirmar com o contador.</li>
         <li><b>FIDC do cliente:</b> MAG MCA 30 FIC FIDC (CNPJ 19.392.834/0001-18), pelo informe mensal de FIDC da CVM, até setembro de 2026. Ele compra cotas de outros FIDCs e a CVM não mostra quais.</li>
         <li><b>Por dentro da carteira:</b> soma o que cada fundo tem, pela carteira que o fundo entrega à CVM (30/06/2026, a mais recente aberta). Quando o fundo compra outro fundo, o simulador abre esse também. CRI e CRA aparecem pelo nome da securitizadora, não da empresa que deve.</li>
+        <li><b>Minhas simulações:</b> cada simulação salva fica guardada neste aparelho. O botão Copiar link gera um link que abre a mesma simulação em qualquer celular ou computador.</li>
+        <li><b>Modelos:</b> as sugestões, a carteira do Max e o FIDC do cliente. Só entram no Simulador ou no Comparar quando você escolhe.</li>
+        <li><b>Comparar:</b> funciona como o comparador do Hub da XP. Escolha a Base e a Comparada entre suas simulações e os modelos.</li>
         <li><b>Teste de calote:</b> supõe que a maior devedora (ou as 3 maiores) não paga e devolve só 30% do que deve.</li>
         <li><b>Nota:</b> de 0 a 10, junta retorno sobre o CDI, meses acima do CDI, maior queda e oscilação, comparando com todos os ativos da lista.</li>
       </ul>
@@ -234,10 +242,15 @@ SUG.forEach(s=>s.items=s.pos.map(([n,w,why])=>({i:pick(n),w,why})).filter(x=>x.i
 const sugPos=s=>s.items.map(x=>({id:x.i.id,w:x.w}));
 
 // ---------- estado ----------
-let ST=store.get('cpj.v3',null);
-if(!ST||!Array.isArray(ST.pos)){ST={val:5000000,pos:sugPos(SUG[2]),from:'Sugestão 3',tab:'sim'}}
-ST.pos=ST.pos.filter(p=>BYID[p.id]);
-const save=()=>store.set('cpj.v3',ST);
+let ST=store.get('cpj.v4',null);
+if(!ST||!Array.isArray(ST.pos)){ST={val:5000000,pos:[],tab:'sim',sims:[],curId:null}}
+ST.pos=ST.pos.filter(p=>BYID[p.id]);ST.sims=(ST.sims||[]).map(s=>({...s,pos:(s.pos||[]).filter(p=>BYID[p.id])}));
+if(ST.curId&&!ST.sims.some(s=>s.id===ST.curId))ST.curId=null;
+const validPos=pos=>pos&&pos.length&&Math.abs(pos.reduce((s,p)=>s+(+p.w||0),0)-100)<0.01;
+const save=()=>{const s=ST.curId&&ST.sims.find(x=>x.id===ST.curId);if(s){s.pos=ST.pos.map(p=>({...p}));s.val=ST.val}store.set('cpj.v4',ST)};
+(()=>{const m=(location.hash||'').match(/^#s=(.+)$/);if(!m)return;try{const o=JSON.parse(decodeURIComponent(m[1]));const pos=(o.p||[]).filter(x=>BYID[x[0]]).map(x=>({id:x[0],w:+x[1]}));if(!pos.length)return;
+  let s=ST.sims.find(x=>x.name===o.n&&JSON.stringify(x.pos)===JSON.stringify(pos));if(!s){s={id:'s'+Date.now(),name:o.n||'Simulação recebida',val:+o.v||5e6,pos};ST.sims.push(s)}
+  ST.curId=s.id;ST.pos=s.pos.map(p=>({...p}));ST.val=s.val;ST.tab='sim';store.set('cpj.v4',ST);try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}}catch(e){}})();
 const wsum=()=>ST.pos.reduce((s,p)=>s+(+p.w||0),0);
 function eq(){const n=ST.pos.length;if(!n)return;const w=Math.floor(10000/n)/100;ST.pos.forEach((p,j)=>p.w=j===n-1?Math.round((100-w*(n-1))*100)/100:w)}
 function addAsset(id){if(ST.pos.some(p=>p.id===id)){toast('Já está na carteira');return}const left=Math.max(0,Math.round((100-wsum())*100)/100);ST.pos.push({id,w:left});ST.from=null;save();toast(left>0?'Adicionado: '+short(BYID[id]):'Adicionado com 0%. Ajuste os percentuais ou use Dividir igual');renderSim()}
@@ -326,6 +339,7 @@ valIn.addEventListener('change',()=>{const v=parseFloat(valIn.value.replace(/[^\
 $('#eq').addEventListener('click',()=>{eq();save();renderSim()});
 $('#clr').addEventListener('click',()=>{ST.pos=[];ST.from=null;save();renderSim()});
 $('#all').addEventListener('click',()=>openList());
+$('#goMod').addEventListener('click',()=>{setTab('sug');scrollTo({top:0})});
 const qIn=$('#q'),dd=$('#dd');
 function renderDD(){const q=qIn.value.trim().toLowerCase();if(q.length<2){dd.hidden=true;return}
   const m=IT.filter(i=>(i.n+' '+(i.tk||'')+' '+(i.gest||'')).toLowerCase().includes(q)).sort((a,b)=>(b.nota??-1)-(a.nota??-1)).slice(0,10);
@@ -336,7 +350,8 @@ document.addEventListener('click',e=>{if(!e.target.closest('.search'))dd.hidden=
 function renderSim(){
   valIn.value=ST.val.toLocaleString('pt-BR');
   $('#valBtns').replaceChildren(...[5e6,10e6,15e6].map(v=>h('button',{class:'btn sm'+(ST.val===v?' on':''),onclick:()=>{ST.val=v;save();renderSim()}},nf(v/1e6,0)+' mi')));
-  $('#quick').replaceChildren(...SUG.map((s,j)=>h('button',{class:'btn sm'+(ST.from===s.n?' on':''),title:s.t,onclick:()=>{loadSug(j);renderSim();toast(s.n+' carregada')}},s.n)),h('button',{class:'btn sm'+(ST.from==='FIDC'?' on':''),onclick:()=>{ST.pos=FIDPOS.map(x=>({...x}));ST.from='FIDC';save();renderSim();toast('FIDC do cliente carregado')}},'FIDC atual do cliente'));
+  renderBar();
+  if(0)$('#quick').replaceChildren(...SUG.map((s,j)=>h('button',{class:'btn sm'+(ST.from===s.n?' on':''),title:s.t,onclick:()=>{loadSug(j);renderSim();toast(s.n+' carregada')}},s.n)),h('button',{class:'btn sm'+(ST.from==='FIDC'?' on':''),onclick:()=>{ST.pos=FIDPOS.map(x=>({...x}));ST.from='FIDC';save();renderSim();toast('FIDC do cliente carregado')}},'FIDC atual do cliente'));
   // tabela de alocação
   const W=wsum(),disp=Math.round((100-W)*100)/100;
   const head=h('tr',null,h('th',{class:'l',text:'Ativo'}),h('th',{class:'l hide-cel',text:'Tipo'}),h('th',{class:'hide-cel',text:'Resgate'}),h('th',null,h('span',{class:'only-desk',text:'% de alocação'}),h('span',{class:'only-cel',text:'%'})),h('th',{class:'hide-cel',text:'Valor'}),h('th',{class:'noprint hide-cel',text:''}));
@@ -345,7 +360,7 @@ function renderSim(){
     return h('tr',null,h('td',{class:'l name'},h('button',{class:'lnk',onclick:()=>openFicha(i.id),text:i.n}),h('div',{class:'mut',style:'font-size:13px'},brl(ST.val*(+p.w||0)/100),h('span',{class:'only-cel',text:' · resgate D+'+i.d+' '}),h('button',{class:'rm only-cel noprint',onclick:()=>remAsset(p.id)},'tirar'))),h('td',{class:'l hide-cel'},h('span',{class:'pill '+pillOf(i.c),text:catLabel(i.c)})),h('td',{class:'hide-cel',text:'D+'+i.d}),h('td',null,inp,' %'),h('td',{class:'hide-cel',text:brl(ST.val*(+p.w||0)/100)}),h('td',{class:'noprint hide-cel'},h('button',{class:'rm',onclick:()=>remAsset(p.id)},'tirar')))});
   const foot=[h('tr',{class:'disp'},h('td',{class:'l',text:'Disponível para alocação'}),h('td',{class:'hide-cel'}),h('td',{class:'hide-cel'}),h('td',{class:Math.abs(disp)>0.01?'warn':null,text:nf(disp,2)+' %'}),h('td',{class:'hide-cel',text:brl(ST.val*disp/100)}),h('td',{class:'noprint hide-cel'})),
     h('tr',{class:'tot'},h('td',{class:'l',text:'Alocação total'}),h('td',{class:'hide-cel'}),h('td',{class:'hide-cel'}),h('td',{text:nf(W,2)+' %'}),h('td',{class:'hide-cel',text:brl(ST.val*W/100)}),h('td',{class:'noprint hide-cel'}))];
-  $('#alloc').replaceChildren(h('thead',null,head),h('tbody',null,ST.pos.length?body:h('tr',null,h('td',{class:'l mut',colspan:'6',text:'Nenhum ativo ainda. Busque acima ou comece por uma sugestão.'})),foot));
+  $('#alloc').replaceChildren(h('thead',null,head),h('tbody',null,ST.pos.length?body:h('tr',null,h('td',{class:'l mut',colspan:'6',text:'Nenhum ativo ainda. Busque um fundo acima, clique em Ver todos os ativos ou use um modelo pronto.'})),foot));
   renderRes();
 }
 // ---------- raio-x, calote, avisos ----------
@@ -420,7 +435,7 @@ function renderRes(){
   const R=sim(ST.pos,ST.val);if(!R)return;
   const ret=(R.G/R.val-1)*100,cret=(R.C/R.val-1)*100,w12=win(R,12),g12=w12?R.val*w12.r/100:null,LT=lookThrough(R.P),AV=alertas(R,LT);
   const fim=R.end==='202610'?'14/10/2026':'fim de '+ml(R.end);
-  box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',null,h('span',{class:'num',text:'3'}),'Resultado'),h('div',{class:'row noprint'},h('button',{class:'btn sm',onclick:()=>{setTab('cmp')}},'Comparar com as sugestões e o FIDC'),inIframe?null:h('button',{class:'btn sm',onclick:()=>print()},'Imprimir ou salvar PDF'))),
+  box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',null,h('span',{class:'num',text:'3'}),'Resultado'),h('div',{class:'row noprint'},h('button',{class:'btn sm',onclick:()=>{ST.cc=ST.curId?'u:'+ST.curId:'cur';save();setTab('cmp');scrollTo({top:0})}},'Comparar com outra'),inIframe?null:h('button',{class:'btn sm',onclick:()=>print()},'Imprimir ou salvar PDF'))),
     h('p',{class:'say'},brl(R.val)+' aplicados no início de '+ml(R.start)+' virariam ',h('b',{text:brl(R.G)}),' em '+fim+', ou ',h('b',{text:nf(ret,2)+'% ('+nf(ret/cret*100,0)+'% do CDI)'}),'. O CDI daria '+brl(R.C)+'.'),
     h('div',{class:'kpis'},[[nf(w12?w12.r:null,2)+'%','rendeu nos últimos 12 meses'+(w12?' ('+nf(w12.r/w12.c*100,0)+'% do CDI)':'')],[nf(R.lad[0]/R.val*100,0)+'%','resgatável em até 1 dia (o mais longo: D+'+R.maxd+')'],[R.above+' de '+R.full.length,'meses no CDI ou acima'],[LT.rj.length?brl(R.val*LT.rjp/100):(LT.ndw>=50?'Não dá para ver':'Nenhuma'),'em empresas que pediram recuperação']].map(([v,k],j)=>h('div',{class:'kpi'},h('div',{class:'v'+(j===3&&LT.rj.length?' warn':''),text:v}),h('div',{class:'k',text:k})))),
     h('div',{class:'alerts'},AV.length?AV.map(t=>h('div',{class:'al',text:t})):h('div',{class:'al ok',text:'Nenhum alerta: tudo em até 35 dias, sem gestor com mais de 40%, sem empresa em recuperação e com histórico de 2 anos ou mais.'})),
@@ -433,7 +448,6 @@ function renderRes(){
     h('tbody',null,per.map(([l,x])=>h('tr',null,h('td',{class:'l'},l,x&&x.from?h('span',{class:'mut',style:'font-size:13px',text:' ('+ml(x.from)+' a '+ml(x.to)+')'}):null),h('td',{text:x?nf(x.r,2)+'%':'–'}),h('td',{class:'mut hide-cel',text:x?nf(x.c,2)+'%':'–'}),h('td',{class:x&&x.c>0&&x.r/x.c<.95?'warn':null,text:x&&x.c>0?nf(x.r/x.c*100,1)+'%':'–'}),h('td',{text:x?brl(R.val*(1+x.r/100)):'–'})))));
   box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',{text:'Histórico de rentabilidade'}),hc.seg),hc.el,h('div',{class:'tw'},ptab)));
   hc.draw();
-  const fb=fidcBox(R);if(fb)box.append(fb);
   box.append(rxCard(R,LT,g12));
   // ver mais
   box.append(h('div',{class:'card noprint',style:'padding:12px 20px;flex-direction:row;align-items:center;flex-wrap:wrap;gap:10px'},h('button',{class:'btn','aria-expanded':String(!!ST.more),onclick:()=>{ST.more=!ST.more;save();renderRes()}},ST.more?'Esconder detalhes ▴':'Ver mais detalhes ▾'),h('span',{class:'note',text:'mês a mês, liquidez, constância, cada ativo e imposto'})));
@@ -460,52 +474,127 @@ function renderRes(){
     h('li',null,h('b',{text:'Depois do IR na fonte: '}),brl(R.N)+' (o CDI num fundo comum daria '+brl(R.CN)+'). Para esta empresa, que é do lucro real, esse IR é adiantamento: o imposto final é o da empresa, igual para qualquer opção.'))));
 }
 
-// ---------- sugestões ----------
-function sugMix(s){const R=sim(sugPos(s),ST.val),w=win(R,12),Rf=sim(FIDPOS,ST.val,R.start,'202609'),wf=win(Rf,12);return {r12:w.r,pc:w.r/w.c*100,gap:ST.val*(wf.r-w.r)/100,maxd:R.maxd,liq1:s.items.filter(x=>x.i.d<=1).reduce((a,x)=>a+x.w,0),R,LT:lookThrough(R.P)}}
+// ---------- modelos ----------
+function MODELS(){return [
+  ...SUG.map((s,j)=>({k:'s'+(j+1),sn:s.n,t:s.t,obj:s.obj,items:s.items,c:s.c,pos:sugPos(s)})),
+  {k:'max',sn:'Carteira do Max',t:'Carteira do Max',obj:'Os 4 fundos que o Max indicou, 25% em cada. É a mesma carteira da comparação no Hub da XP.',items:MAXPOS.map(p=>({i:BYID[p.id],w:p.w})),c:'--s4',pos:MAXPOS},
+  {k:'fidc',sn:'FIDC do cliente',t:'FIDC atual do cliente',obj:'MAG MCA 30 FIC FIDC, onde o dinheiro do cliente está hoje.',items:[{i:FID,w:100}],c:'--warn',pos:FIDPOS}]}
+const autoWhy=i=>(i.w12?nf(pcdi(i.w12),0)+'% do CDI em 12 meses':'')+(i.w36?', '+nf(pcdi(i.w36),0)+'% em 3 anos':'')+'. Resgate em '+(i.d<=1?'1 dia':i.d+' dias')+'.';
+function useModel(m){ST.pos=m.pos.map(p=>({...p}));ST.curId=null;ST.draft=m.sn;save();setTab('sim');scrollTo({top:0});toast(m.sn+' no simulador. Salve para guardar.')}
 function renderSug(){
   const box=$('section[data-panel="sug"]');box.replaceChildren();
   const Rf=sim(FIDPOS,ST.val,null,'202609'),wf=win(Rf,12),f2=FX.flows.slice(-2);
+  box.append(h('div',{class:'card'},h('h2',{text:'Modelos prontos'}),h('p',{class:'mut',style:'margin:0;max-width:95ch',text:'Carteiras prontas para usar de ponto de partida. Elas só entram no Simulador ou no Comparar quando você escolhe.'})));
+  box.append(h('div',{class:'sugs'},MODELS().map(m=>{const R=sim(m.pos,ST.val),w=win(R,12),LT=lookThrough(R.P);
+    return h('div',{class:'card sg',style:'--c:var('+m.c+')'},h('div',null,h('div',{class:'mut',style:'font-size:13.5px',text:m.sn}),h('h2',{text:m.t})),h('p',{class:'mut',style:'margin:0;font-size:14.5px',text:m.obj}),
+      h('div',null,m.items.map(x=>h('div',{class:'a'},h('div',{class:'w',text:x.w+'%'}),h('div',{style:'min-width:0'},h('button',{class:'lnk',onclick:()=>openFicha(x.i.id),text:x.i.n}),h('p',{text:x.why||autoWhy(x.i)}))))),
+      h('div',{class:'stats'},h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:w?nf(w.r,2)+'%':'–'}),h('div',{class:'k',text:'nos últimos 12 meses'+(w?' ('+nf(w.r/w.c*100,0)+'% do CDI)':'')})),h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:R.maxd<=1?'1 dia':R.maxd+' dias'}),h('div',{class:'k',text:'resgate mais longo'})),
+        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:nf(R.lad[0]/R.val*100,0)+'%'}),h('div',{class:'k',text:'em até 1 dia'})),h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:R.below+' de '+R.full.length}),h('div',{class:'k',text:'meses abaixo do CDI desde '+ml(R.start)}))),
+      h('div',{class:'note',text:m.k==='fidc'?'Por dentro: '+nf(FX.comp[0][1],0)+'% em cotas de outros FIDCs, sem detalhe.':'Por dentro: '+catLine(LT)+'. '+(LT.rj.length?'Tem '+LT.rj.map(([n,o])=>n+' ('+nf(o.p,2)+'%)').join(', ')+'.':'Nenhuma empresa em recuperação.')}),
+      h('div',{class:'row'},h('button',{class:'btn pri',onclick:()=>useModel(m)},'Usar no Simulador'),h('button',{class:'btn',onclick:()=>{if(m.k==='fidc'){ST.cb='fidc'}else{ST.cc=m.k;if(!ST.cb)ST.cb='fidc'}save();setTab('cmp');scrollTo({top:0})}},'Comparar')))})));
   box.append(h('div',{class:'card extra'},h('h2',{text:'Por que trocar o FIDC do cliente'}),
     h('p',{style:'margin:0;max-width:95ch'},'O MAG MCA 30 foi muito bem: rendeu ',h('b',{text:nf(wf.r,2)+'% em 12 meses ('+nf(wf.r/wf.c*100,0)+'% do CDI)'}),' e não ficou abaixo do CDI em nenhum mês desde 2022. O motivo para trocar não é o rendimento, é o risco:'),
     h('ul',null,
       h('li',null,'Ele compra cotas de outros FIDCs ('+nf(FX.comp[0][1],0)+'% do dinheiro), e a CVM não mostra quais são.'),
       h('li',null,'Promete devolver em 31 dias, mas '+FX.liq.mais360+'% do que ele tem só vira dinheiro depois de 1 ano. Se muita gente pedir resgate junto, o fundo pode suspender os resgates (a regra da CVM permite).'),
       h('li',null,'O dinheiro está saindo: em '+ml(f2[1][0])+' entraram R$ '+nf(f2[1][1],0)+' milhões e saíram R$ '+nf(f2[1][2],0)+' milhões. Em '+ml(f2[0][0])+', R$ '+nf(f2[0][1],0)+' contra R$ '+nf(f2[0][2],0)+' milhões.'),
-      h('li',null,'O momento é ruim para crédito: em 2026 Braskem, Casas Bahia, Raízen e GPA pediram recuperação.')),
-    h('p',{class:'mut',style:'margin:0;max-width:95ch',text:'As sugestões rendem menos, mas mostram o que têm dentro e devolvem o dinheiro em até 32 dias de verdade.'})));
-  box.append(h('div',{class:'sugs'},SUG.map((s,j)=>{const m=sugMix(s);
-    return h('div',{class:'card sg',style:'--c:var('+s.c+')'},h('div',null,h('div',{class:'mut',style:'font-size:13.5px',text:s.n}),h('h2',{text:s.t})),h('p',{class:'mut',style:'margin:0;font-size:14.5px',text:s.obj}),
-      h('div',null,s.items.map(x=>h('div',{class:'a'},h('div',{class:'w',text:x.w+'%'}),h('div',{style:'min-width:0'},h('button',{class:'lnk',onclick:()=>openFicha(x.i.id),text:x.i.n}),h('p',{text:x.why}))))),
-      h('div',{class:'stats'},h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:nf(m.r12,2)+'%'}),h('div',{class:'k',text:'nos últimos 12 meses ('+nf(m.pc,0)+'% do CDI)'})),h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:'D+'+m.maxd}),h('div',{class:'k',text:'resgate mais longo'})),
-        h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:m.liq1+'%'}),h('div',{class:'k',text:'em até 1 dia'})),h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:19px',text:brl(Math.abs(m.gap))}),h('div',{class:'k',text:(m.gap>=0?'a menos':'a mais')+' que o FIDC em 12 meses, em '+brl(ST.val)}))),
-      h('div',{class:'note',text:'Por dentro: '+catLine(m.LT)+'. '+(m.LT.rj.length?'Tem '+m.LT.rj.map(([n,o])=>n+' ('+nf(o.p,2)+'%)').join(', ')+'.':'Nenhuma empresa em recuperação.')}),
-      h('button',{class:'btn pri',onclick:()=>{loadSug(j);setTab('sim');scrollTo({top:0});toast(s.n+' no simulador')}},'Simular esta sugestão'))})));
+      h('li',null,'O momento é ruim para crédito: em 2026 Braskem, Casas Bahia, Raízen e GPA pediram recuperação.'))));
+}
+// ---------- minhas simulações ----------
+const PUBLIC_URL='https://wesleylivwork-tech.github.io/apresentacao-institucional/credito-pj/';
+const curSim=()=>ST.curId&&ST.sims.find(x=>x.id===ST.curId);
+function shareLink(){const s=curSim();return PUBLIC_URL+'#s='+encodeURIComponent(JSON.stringify({n:s?s.name:(ST.draft||'Simulação'),v:ST.val,p:ST.pos.map(p=>[p.id,p.w])}))}
+function renderBar(){
+  const bar=$('#simbar');const s=curSim();
+  const name=h('input',{type:'text',value:s?s.name:'',placeholder:ST.draft?ST.draft+' (cópia)':'Ex.: Genesio, proposta 1','aria-label':'Nome da simulação',style:'flex:1;min-width:180px;max-width:340px'});
+  name.addEventListener('change',()=>{if(s&&name.value.trim()){s.name=name.value.trim();save();renderBar()}});
+  const chips=ST.sims.map(x=>h('button',{class:'btn sm'+(x.id===ST.curId?' on':''),onclick:()=>{ST.curId=x.id;ST.pos=x.pos.map(p=>({...p}));ST.val=x.val;ST.draft=null;save();renderSim()}},x.name));
+  const linkBox=h('div',{class:'row',hidden:true},h('input',{type:'text',readonly:true,value:'','aria-label':'Link da simulação',style:'flex:1;min-width:200px;font-size:13px'}));
+  bar.replaceChildren(h('div',{class:'card-h'},h('h2',{text:'Minhas simulações'}),h('button',{class:'btn sm',onclick:()=>{ST.curId=null;ST.pos=[];ST.draft=null;save();renderSim();toast('Nova simulação')}},'+ Nova simulação')),
+    chips.length?h('div',{class:'row'},chips):h('div',{class:'note',text:'Nenhuma salva ainda. Monte abaixo e clique em Salvar.'}),
+    h('div',{class:'row noprint'},h('span',{class:'mut',text:'Nome'}),name,
+      s?h('span',{class:'note',text:'Salva. As mudanças ficam guardadas sozinhas.'}):h('button',{class:'btn sm pri',onclick:()=>{if(!validPos(ST.pos)){toast('Complete 100% antes de salvar');return}const nm=name.value.trim()||(ST.draft?ST.draft+' (cópia)':'Simulação '+(ST.sims.length+1));const n={id:'s'+Date.now(),name:nm,val:ST.val,pos:ST.pos.map(p=>({...p}))};ST.sims.push(n);ST.curId=n.id;ST.draft=null;save();renderSim();toast('Simulação salva')}},'Salvar'),
+      h('button',{class:'btn sm',onclick:()=>{if(!validPos(ST.pos)){toast('Complete 100% antes');return}const u=shareLink();const inp=linkBox.querySelector('input');inp.value=u;linkBox.hidden=false;inp.select();try{navigator.clipboard.writeText(u).then(()=>toast('Link copiado. Quem abrir vê esta simulação.'),()=>toast('Copie o link abaixo'))}catch(e){toast('Copie o link abaixo')}}},'Copiar link'),
+      s?h('button',{class:'rm',onclick:()=>{ST.sims=ST.sims.filter(x=>x.id!==s.id);ST.curId=null;save();renderSim();toast('Simulação apagada')}},'apagar'):null),
+    linkBox,
+    h('div',{class:'note',text:'Ficam salvas neste aparelho. Para mandar ao Wesley ou ao Max, use Copiar link.'}));
 }
 
-// ---------- comparar ----------
+// ---------- comparar: base x comparada ----------
+const MAXPOS=[['Polo Total Credit FIF Multimercado CP RL',25],['Compass Yield 30 FIF RF CP LP RL',25],['Brave Iron FIRF CP RL',25],['LFTS11',25]].map(([n,w])=>({i:pick(n),w})).filter(x=>x.i).map(x=>({id:x.i.id,w:x.w}));
+function PRE(){const L=[];
+  ST.sims.forEach(s=>L.push({k:'u:'+s.id,n:s.name,sn:s.name,pos:validPos(s.pos)?s.pos:null,g:'Minhas simulações'}));
+  if(!ST.curId)L.push({k:'cur',n:validPos(ST.pos)?'Simulação aberta (ainda não salva)':'Simulação aberta (complete 100%)',sn:'Simulação aberta',pos:validPos(ST.pos)?ST.pos:null,g:'Minhas simulações'});
+  MODELS().forEach(m=>L.push({k:m.k,n:m.sn+(m.t!==m.sn?': '+m.t:''),sn:m.sn,pos:m.pos,g:'Modelos'}));
+  return L}
+const volW=(R,n)=>{const f=R.full.slice(-n);if(f.length<n||n<3)return null;const rs=f.map(r=>r.r*100),mu=rs.reduce((a,b)=>a+b,0)/rs.length;return Math.sqrt(rs.reduce((a,b)=>a+(b-mu)**2,0)/(rs.length-1))*Math.sqrt(12)};
 function renderCmp(){
   const box=$('section[data-panel="cmp"]');box.replaceChildren();
-  const list=[];const cur=ST.pos.length&&Math.abs(wsum()-100)<0.01&&!SUG.some(s=>s.n===ST.from)&&!(ST.pos.length===1&&ST.pos[0].id===FID.id)?{name:'Sua carteira',color:css('--s4'),pos:ST.pos}:null;
-  if(cur)list.push(cur);SUG.forEach(s=>list.push({name:s.n,color:css(s.c),pos:sugPos(s),sub:s.t}));
-  list.push({name:'FIDC do cliente',color:css('--warn'),pos:FIDPOS,sub:'MAG MCA 30',fidc:1});
-  const start=list.map(x=>sim(x.pos,ST.val).lim).reduce((a,b)=>a>b?a:b);
-  list.forEach(x=>{x.R=sim(x.pos,ST.val,start,'202609');x.LT=lookThrough(x.R.P);x.w=win(x.R,12)});
-  const F=list[list.length-1];
-  const rows=[['Rendeu nos últimos 12 meses',x=>x.w?nf(x.w.r,2)+'% ('+nf(x.w.r/x.w.c*100,0)+'% do CDI)':'–'],
-    ['Em reais, em 12 meses',x=>x.w?brl(ST.val*x.w.r/100):'–'],
-    ['Diferença para o FIDC, em 12 meses',x=>x.fidc||!x.w||!F.w?'–':(x.w.r>=F.w.r?'+ ':'- ')+brl(Math.abs(ST.val*(x.w.r-F.w.r)/100))],
-    ['Desde '+ml(start)+' até '+ml('202609'),x=>nf((x.R.G/x.R.val-1)*100,2)+'% ('+nf((x.R.G/x.R.val-1)/(x.R.C/x.R.val-1)*100,0)+'% do CDI)'],
-    ['Resgatável em até 1 dia',x=>nf(x.R.lad[0]/x.R.val*100,0)+'%'],
-    ['Resgate mais longo',x=>x.R.maxd<=1?'1 dia':x.R.maxd+' dias'],
-    ['Meses abaixo do CDI',x=>x.R.below+' de '+x.R.full.length],
-    ['Pior mês',x=>x.R.worst?nf(x.R.worst.r*100,2)+'% em '+ml(x.R.worst.k):'–'],
-    ['Por dentro',x=>x.fidc?'Cotas de outros FIDCs, sem detalhe':catLine(x.LT)],
-    ['Empresas em recuperação',x=>x.fidc?'Não dá para saber':x.LT.rj.length?brl(ST.val*x.LT.rjp/100)+' ('+x.LT.rj.map(([n])=>n).join(', ')+')':'Nenhuma']];
-  const ccards=h('div',{class:'only-cel'},h('div',{class:'mc'},list.map(x=>h('div',{class:'lc',style:'border-left:4px solid '+x.color},h('div',null,h('b',{style:'color:'+x.color,text:x.name}),x.sub?h('span',{class:'mut',text:' · '+x.sub}):null),rows.map(([l,f])=>h('div',{class:'r'},h('span',{text:l}),h('b',{style:'text-align:right',text:f(x)})))))));
-  const head=h('tr',null,h('th',{class:'l',text:''}),list.map(x=>h('th',{class:'l',style:'color:'+x.color},x.name,x.sub?h('div',{class:'mut',style:'font-weight:400;font-size:13px',text:x.sub}):null)));
-  const body=rows.map(([l,f])=>h('tr',null,h('td',{class:'l mut',text:l}),list.map(x=>h('td',{class:'l',style:'white-space:normal;min-width:140px',text:f(x)}))));
-  box.append(h('div',{class:'card'},h('h2',{text:'Lado a lado, no mesmo período'}),h('div',{class:'note',text:(cur?'Inclui a carteira que está no Simulador. ':'Monte uma carteira com 100% no Simulador para ela aparecer aqui também. ')+'Tudo até setembro de 2026, o último mês com dado do FIDC.'}),h('div',{class:'tw only-desk'},h('table',null,h('thead',null,head),h('tbody',null,body))),ccards));
-  const hc=histChart(list,'cv2','ex');box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',{text:'Desde '+ml(start)+', lado a lado'}),hc.seg),hc.el));hc.draw();
+  const P=PRE(),ok=P.filter(x=>x.pos);const mine=ok.find(x=>x.g==='Minhas simulações');
+  const b=ok.find(x=>x.k===(ST.cb||'fidc'))||ok.find(x=>x.k==='fidc');const c=ok.find(x=>x.k===ST.cc)||mine||ok.find(x=>x.k==='max');
+  const sel=(cur,key,lab)=>{const s=h('select',{'aria-label':lab,style:'width:100%'},['Minhas simulações','Modelos'].map(g=>{const xs=P.filter(x=>x.g===g);return xs.length?h('optgroup',{label:g},xs.map(x=>h('option',{value:x.k,disabled:!x.pos,text:x.n}))):null}));s.value=cur.k;s.addEventListener('change',()=>{ST[key]=s.value;save();renderCmp()});return s};
+  const per=ST.cper||'all';
+  const segP=h('div',{class:'seg',role:'group','aria-label':'Período'},[['all','Tudo que dá'],['36','36 meses'],['24','24 meses'],['12','12 meses']].map(([k,l])=>h('button',{'aria-pressed':String(per===k),onclick:()=>{ST.cper=k;save();renderCmp()}},l)));
+  box.append(h('div',{class:'card'},h('h2',{text:'Comparador'}),h('p',{class:'mut',style:'margin:0',text:'Escolha qualquer simulação sua ou modelo nos dois lados. Valor: '+brl(ST.val)+' (muda no Simulador).'}),
+    h('div',{class:'cmpsel'},h('label',null,h('span',{class:'mut',text:'Base'}),sel(b,'cb','Base')),h('button',{class:'btn',title:'Trocar os lados','aria-label':'Trocar Base e Comparada',onclick:()=>{ST.cb=c.k;ST.cc=b.k;save();renderCmp()}},'⇄'),h('label',null,h('span',{class:'mut',text:'Comparada'}),sel(c,'cc','Comparada'))),
+    h('div',{class:'row'},h('span',{class:'mut',text:'Período:'}),segP)));
+  if(b.k===c.k){box.append(h('div',{class:'card'},h('div',{class:'empty',text:'Escolha duas carteiras diferentes.'})));return}
+  const r0b=sim(b.pos,ST.val),r0c=sim(c.pos,ST.val);
+  const lim=r0b.lim>r0c.lim?r0b.lim:r0c.lim,end=r0b.end<r0c.end?r0b.end:r0c.end,lastFull=end==='202610'?'202609':end;
+  let start=lim,curto=false;
+  if(per!=='all'){const s=MONTHS[MONTHS.indexOf(lastFull)-(+per-1)];if(s&&s>=lim)start=s;else curto=true}
+  const Rb=sim(b.pos,ST.val,start,end),Rc=sim(c.pos,ST.val,start,end);
+  const LTb=lookThrough(Rb.P),LTc=lookThrough(Rc.P);
+  const fim=end==='202610'?'14/10/2026':'fim de '+ml(end),diff=Rc.G-Rb.G;
+  const cb=css('--s1'),cc=css('--s2');
+  // resposta
+  box.append(h('div',{class:'card'},h('p',{class:'say'},'Investindo '+brl(ST.val)+' de '+ml(start)+' até '+fim+', a Comparada (',h('b',{style:'color:'+cc,text:c.sn}),') teria ',h('b',{text:brl(Math.abs(diff))+(diff>=0?' a mais':' a menos')}),' que a Base (',h('b',{style:'color:'+cb,text:b.sn}),').'),
+    h('div',{class:'kpis'},[[brl(Rc.G-Rc.C),c.sn+' acima do CDI no período'],[brl(Rb.G-Rb.C),b.sn+' acima do CDI no período'],[Rc.maxd+' dias',c.sn+': resgate mais longo'],[Rb.maxd+' dias',b.sn+': resgate mais longo']].map(([v,k])=>h('div',{class:'kpi'},h('div',{class:'v',style:'font-size:20px',text:v}),h('div',{class:'k',text:k})))),
+    curto?h('div',{class:'note',text:'Não há '+per+' meses de histórico para as duas. O período começa em '+ml(start)+'.'}):null,
+    end!=='202610'?h('div',{class:'note',text:'Vai até '+ml(end)+' porque o FIDC só informa uma vez por mês.'}):null));
+  // tabela lado a lado
+  const wb=win(Rb,12),wc=win(Rc,12),pct=(R)=>{const r=(R.G/R.val-1)*100,cd=(R.C/R.val-1)*100;return [nf(r,2)+'%',nf(r/cd*100,0)+'% do CDI']};
+  const sub=(a)=>Array.isArray(a)?[a[0],h('div',{class:'mut',style:'font-size:12.5px',text:a[1]})]:a;
+  const rows=[['Rendeu no período',pct(Rb),pct(Rc),brl(diff)],['Ganho em reais',brl(Rb.G-Rb.val),brl(Rc.G-Rc.val),''],
+    ['Últimos 12 meses',wb?[nf(wb.r,2)+'%',nf(wb.r/wb.c*100,0)+'% do CDI']:'–',wc?[nf(wc.r,2)+'%',nf(wc.r/wc.c*100,0)+'% do CDI']:'–',wb&&wc?brl(ST.val*(wc.r-wb.r)/100):''],
+    ['Resgate mais longo',Rb.maxd+' dias',Rc.maxd+' dias',''],['Em até 1 dia',nf(Rb.lad[0]/Rb.val*100,0)+'%',nf(Rc.lad[0]/Rc.val*100,0)+'%',''],
+    ['Meses abaixo do CDI',Rb.below+' de '+Rb.full.length,Rc.below+' de '+Rc.full.length,''],
+    ['Pior mês',Rb.worst?[nf(Rb.worst.r*100,2)+'%',ml(Rb.worst.k)]:'–',Rc.worst?[nf(Rc.worst.r*100,2)+'%',ml(Rc.worst.k)]:'–',''],
+    ['Oscilação no ano',Rb.vol==null?'–':nf(Rb.vol,2)+'%',Rc.vol==null?'–':nf(Rc.vol,2)+'%',''],
+    ['Empresas em recuperação',LTb.rj.length?brl(ST.val*LTb.rjp/100):(LTb.ndw>=50?'Não dá para ver':'Nenhuma'),LTc.rj.length?brl(ST.val*LTc.rjp/100):(LTc.ndw>=50?'Não dá para ver':'Nenhuma'),'']];
+  const th=h('tr',null,h('th',{class:'l',text:''}),h('th',{style:'color:'+cb,text:b.sn}),h('th',{style:'color:'+cc,text:c.sn}),h('th',{class:'hide-cel',text:'Diferença'}));
+  box.append(h('div',{class:'card'},h('h2',{text:'Lado a lado'}),h('div',{class:'tw'},h('table',{class:'cmpt'},h('thead',null,th),h('tbody',null,rows.map(([l,x,y,d])=>h('tr',null,h('td',{class:'l mut',text:l}),h('td',null,sub(x)),h('td',null,sub(y)),h('td',{class:'hide-cel',text:d}))))))));
+  // gráfico + períodos
+  const hc=histChart([{name:b.sn,color:cb,R:Rb},{name:c.sn,color:cc,R:Rc}],'cv3','acc');
+  const lb=Rb.rows[Rb.rows.length-1],lc=Rc.rows[Rc.rows.length-1];
+  const pr=[['No mês ('+ml(lb.k)+(lb.k==='202610'?' até 14':'')+')',{r:lb.r*100,c:lb.c*100},{r:lc.r*100,c:lc.c*100}],['No ano',span(Rb,'202601','202610'),span(Rc,'202601','202610')],['3 meses',win(Rb,3),win(Rc,3)],['6 meses',win(Rb,6),win(Rc,6)],['12 meses',wb,wc],['24 meses',win(Rb,24),win(Rc,24)],['36 meses',win(Rb,36),win(Rc,36)],['No período',{r:(Rb.G/Rb.val-1)*100,c:(Rb.C/Rb.val-1)*100},{r:(Rc.G/Rc.val-1)*100,c:(Rc.C/Rc.val-1)*100}]].filter(([l,x,y])=>x&&y);
+  const cl=x=>[nf(x.r,2)+'%',h('div',{class:'mut',style:'font-size:12.5px',text:nf(x.r/x.c*100,0)+'% do CDI'})];
+  const pt=h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:'Período'}),h('th',{style:'color:'+cb,text:b.sn}),h('th',{style:'color:'+cc,text:c.sn}),h('th',{class:'hide-cel',text:'Diferença em '+brl(ST.val)}))),
+    h('tbody',null,pr.map(([l,x,y])=>h('tr',null,h('td',{class:'l',text:l}),h('td',null,cl(x)),h('td',null,cl(y)),h('td',{class:'hide-cel '+(y.r<x.r?'warn':''),text:(y.r>=x.r?'+ ':'- ')+brl(Math.abs(ST.val*(y.r-x.r)/100))})))));
+  box.append(h('div',{class:'card'},h('div',{class:'card-h'},h('h2',{text:'Histórico de rentabilidade'}),hc.seg),hc.el,h('div',{class:'tw'},pt)));hc.draw();
+  // liquidez e por dentro
+  const side=(x,R,LT,col)=>h('div',{class:'card',style:'border-top:4px solid '+col},h('h3',{style:'color:'+col,text:x.sn}),
+    h('div',{class:'mut',style:'font-size:14px'},R.P.map(p=>nf(p.w/R.W*100,0)+'% '+short(p.i)).join(' · ')),
+    h('h3',{text:'Em quanto tempo o dinheiro volta'}),ladderEl(R.lad,R.val),
+    h('h3',{text:'Para quem o dinheiro está emprestado'}),catBar(LT.cats,R.val),
+    LT.rj.length?h('div',{class:'al',text:'Empresas que pediram recuperação: '+LT.rj.map(([n,o])=>n+' '+brl(R.val*o.p/100)).join(', ')+'.'}):(LT.top.length?h('div',{class:'al ok',text:'Nenhuma empresa que pediu recuperação.'}):h('div',{class:'al neu',text:'Não mostra para quem empresta.'})),
+    LT.top.length?h('div',{class:'note',text:'Maiores devedoras: '+LT.top.slice(0,3).map(([n,o])=>n+' '+nf(o.p,1)+'%').join(', ')+'.'}):null);
+  box.append(h('div',{class:'grid2'},side(b,Rb,LTb,cb),side(c,Rc,LTc,cc)));
+  // movimentações
+  const mv=(R,s)=>h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:s>0?'Aplicar em':'Resgatar de'}),h('th',{text:'Prazo'}),h('th',{text:'Valor'}))),h('tbody',null,R.P.map(p=>h('tr',null,h('td',{class:'l',style:'white-space:normal',text:short(p.i)}),h('td',{text:p.i.d<=1?'1 dia':p.i.d+' dias'}),h('td',{text:(s>0?'':'- ')+brl(ST.val*p.w/R.W)})))));
+  box.append(h('div',{class:'card'},h('h2',{text:'Como trocar a Base pela Comparada'}),h('div',{class:'grid2'},h('div',{class:'tw'},mv(Rb,-1)),h('div',{class:'tw'},mv(Rc,1))),
+    h('p',{style:'margin:0;max-width:90ch'},'Todo o dinheiro da '+b.sn+' fica disponível em até ',h('b',{text:Rb.maxd+(Rb.maxd===1?' dia':' dias')}),'. Até lá ele continua rendendo onde está.'+(Rb.P.some(p=>p.i.d>1)&&Rb.P.some(p=>p.i.d<=1)?' O que sai em 1 dia já pode ir para a '+c.sn+' antes.':''))));
+  // ver mais
+  box.append(h('div',{class:'card noprint',style:'padding:12px 20px;flex-direction:row;align-items:center;flex-wrap:wrap;gap:10px'},h('button',{class:'btn','aria-expanded':String(!!ST.cmore),onclick:()=>{ST.cmore=!ST.cmore;save();renderCmp()}},ST.cmore?'Esconder detalhes ▴':'Ver mais detalhes ▾'),h('span',{class:'note',text:'mês a mês e oscilação por período'}),inIframe?null:h('button',{class:'btn sm',onclick:()=>print()},'Imprimir ou salvar PDF')));
+  if(!ST.cmore)return;
+  const yrs=[...new Set(Rb.rows.map(r=>r.k.slice(0,4)))],kb=Object.fromEntries(Rb.rows.map(r=>[r.k,r])),kc=Object.fromEntries(Rc.rows.map(r=>[r.k,r]));
+  const two=(x,y)=>x&&y?[h('div',{style:'color:'+cb,text:nf(x.r*100,2)+'%'}),h('div',{style:'color:'+cc,text:nf(y.r*100,2)+'%'})]:'–';
+  const mg=h('table',{class:'mgrid'},h('thead',null,h('tr',null,h('th',{class:'l',text:'Mês'}),yrs.map(y=>h('th',{text:y})))),
+    h('tbody',null,MESL.map((m,mi)=>h('tr',null,h('td',{class:'l',text:m}),yrs.map(y=>{const k=y+String(mi+1).padStart(2,'0');return h('td',null,two(kb[k],kc[k]))}))),
+      h('tr',{style:'font-weight:700'},h('td',{class:'l',text:'No ano'}),yrs.map(y=>{const x=span(Rb,y+'01',y+'12'),z=span(Rc,y+'01',y+'12');return h('td',null,x&&z?[h('div',{style:'color:'+cb,text:nf(x.r,2)+'%'}),h('div',{style:'color:'+cc,text:nf(z.r,2)+'%'})]:'–')}))));
+  box.append(h('div',{class:'card'},h('h2',{text:'Mês a mês'}),legend([{name:b.sn,color:cb},{name:c.sn,color:cc}]),h('div',{class:'tw'},mg)));
+  const vt=h('table',null,h('thead',null,h('tr',null,h('th',{class:'l',text:'Oscilação no ano'}),h('th',{style:'color:'+cb,text:b.sn}),h('th',{style:'color:'+cc,text:c.sn}))),h('tbody',null,[3,6,12,24,36].map(n=>{const x=volW(Rb,n),y=volW(Rc,n);return x==null||y==null?null:h('tr',null,h('td',{class:'l',text:n+' meses'}),h('td',{text:nf(x,2)+'%'}),h('td',{text:nf(y,2)+'%'}))})));
+  box.append(h('div',{class:'card'},h('h2',{text:'Oscilação por período'}),h('div',{class:'note',text:'Quanto o rendimento mensal varia, levado para um ano. Quanto menor, mais estável.'}),h('div',{class:'tw'},vt)));
 }
 
 // ---------- lista de ativos ----------
